@@ -22,9 +22,10 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
 {
     public partial class Tool_Screenshot
     {
+        public const string ScreenshotCameraToolId = "screenshot-camera";
         [McpPluginTool
         (
-            "screenshot-camera",
+            ScreenshotCameraToolId,
             Title = "Screenshot / Camera"
         )]
         [Description("Captures a screenshot from a camera and returns it as an image. " +

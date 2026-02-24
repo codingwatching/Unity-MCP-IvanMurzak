@@ -22,9 +22,10 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
 {
     public partial class Tool_Screenshot
     {
+        public const string ScreenshotGameViewToolId = "screenshot-game-view";
         [McpPluginTool
         (
-            "screenshot-game-view",
+            ScreenshotGameViewToolId,
             Title = "Screenshot / Game View"
         )]
         [Description("Captures a screenshot from the Unity Editor Game View and returns it as an image. " +
