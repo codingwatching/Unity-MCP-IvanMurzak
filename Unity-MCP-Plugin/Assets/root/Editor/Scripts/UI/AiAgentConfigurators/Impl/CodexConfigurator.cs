@@ -111,7 +111,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
         {
             base.ApplyHttpAuthorizationConfig(config);
 
-            var tomlConfig = config as TomlAiAgentConfig ?? throw new System.InvalidCastException("Expected TomlAiAgentConfig for Codex HTTP configuration");
+            var tomlConfig = config as TomlAiAgentConfig ?? throw new System.InvalidCastException($"Expected TomlAiAgentConfig for Codex HTTP configuration but got {config.GetType().Name}");
             var isRequired = UnityMcpPlugin.AuthOption == AuthOption.required;
             var token = UnityMcpPlugin.Token;
 

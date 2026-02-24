@@ -381,7 +381,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor
         ///     "Unity ProjectName": {
         ///       "type": "...",    // optional, only if provided
         ///       "command": "path/to/unity-mcp-server",
-        ///       "args": ["port=...", "plugin-timeout=...", "client-transport=stdio", "token=..."]
+        ///       "args": ["port=...", "plugin-timeout=...", "client-transport=stdio" /*, "token=..." if auth required */]
         ///     }
         ///   }
         /// }
