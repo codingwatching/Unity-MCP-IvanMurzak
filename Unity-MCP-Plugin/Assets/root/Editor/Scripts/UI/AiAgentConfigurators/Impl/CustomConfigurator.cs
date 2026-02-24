@@ -56,11 +56,6 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
             // Custom configurator doesn't have a remove button, so we can skip this
         }
 
-        public override void Invalidate()
-        {
-            base.Invalidate();
-        }
-
         protected override void OnUICreated(VisualElement root)
         {
             SetAgentIcon();
