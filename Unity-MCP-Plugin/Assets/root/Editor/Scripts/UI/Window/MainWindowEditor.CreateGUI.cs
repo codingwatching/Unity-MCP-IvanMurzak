@@ -21,6 +21,7 @@ using Microsoft.Extensions.Logging;
 using R3;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static com.IvanMurzak.McpPlugin.Common.Consts.MCP.Server;
 using LogLevel = com.IvanMurzak.Unity.MCP.Runtime.Utils.LogLevel;
 using TransportMethod = com.IvanMurzak.McpPlugin.Common.Consts.MCP.Server.TransportMethod;
 
@@ -384,6 +385,114 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                 .AddTo(_disposables);
 
             btnStartStop.RegisterCallback<ClickEvent>(evt => HandleServerButton(btnStartStop, statusLabel));
+
+            // MCP server authorization configuration UI elements
+            var labelAuthorizationToken = root.Query<Label>("labelAuthorizationToken").First();
+            var toggleAuthorizationNone = root.Query<Toggle>("toggleAuthorizationNone").First();
+            var toggleAuthorizationRequired = root.Query<Toggle>("toggleAuthorizationRequired").First();
+            var inputAuthorizationToken = root.Query<TextField>("inputAuthorizationToken").First();
+            var tokenSection = root.Query<VisualElement>("tokenSection").First();
+            var btnGenerateToken = root.Query<Button>("btnGenerateToken").First();
+
+            if (toggleAuthorizationNone == null)
+            {
+                Debug.LogError("toggleAuthorizationNone not found in UXML.");
+                return;
+            }
+            if (toggleAuthorizationRequired == null)
+            {
+                Debug.LogError("toggleAuthorizationRequired not found in UXML.");
+                return;
+            }
+            if (inputAuthorizationToken == null)
+            {
+                Debug.LogError("inputAuthorizationToken not found in UXML.");
+                return;
+            }
+            if (tokenSection == null)
+            {
+                Debug.LogError("tokenSection not found in UXML.");
+                return;
+            }
+            if (btnGenerateToken == null)
+            {
+                Debug.LogError("btnGenerateToken not found in UXML.");
+                return;
+            }
+
+            if (labelAuthorizationToken != null) labelAuthorizationToken.tooltip = Tooltip_LabelAuthorizationToken;
+            toggleAuthorizationNone.tooltip = Tooltip_ToggleAuthNone;
+            toggleAuthorizationRequired.tooltip = Tooltip_ToggleAuthRequired;
+            btnGenerateToken.tooltip = Tooltip_BtnGenerateToken;
+
+            var authOption = UnityMcpPlugin.AuthOption;
+            toggleAuthorizationNone.SetValueWithoutNotify(authOption == AuthOption.none);
+            toggleAuthorizationRequired.SetValueWithoutNotify(authOption == AuthOption.required);
+            inputAuthorizationToken.SetValueWithoutNotify(UnityMcpPlugin.Token ?? string.Empty);
+            SetTokenFieldsVisible(inputAuthorizationToken, tokenSection, authOption == AuthOption.required);
+
+
+
+            toggleAuthorizationNone.RegisterValueChangedCallback(evt =>
+            {
+                if (evt.newValue)
+                {
+                    var wasRunning = McpServerManager.IsRunning && UnityMcpPlugin.TransportMethod != TransportMethod.stdio;
+                    UnityMcpPlugin.AuthOption = AuthOption.none;
+                    UnityMcpPlugin.Instance.Save();
+                    toggleAuthorizationRequired.SetValueWithoutNotify(false);
+                    SetTokenFieldsVisible(inputAuthorizationToken, tokenSection, false);
+                    InvalidateAndReloadAgentUI();
+                    RestartServerIfWasRunning(wasRunning);
+                }
+                else if (!toggleAuthorizationRequired.value)
+                {
+                    toggleAuthorizationNone.SetValueWithoutNotify(true);
+                }
+            });
+
+            toggleAuthorizationRequired.RegisterValueChangedCallback(evt =>
+            {
+                if (evt.newValue)
+                {
+                    var wasRunning = McpServerManager.IsRunning && UnityMcpPlugin.TransportMethod != TransportMethod.stdio;
+                    UnityMcpPlugin.AuthOption = AuthOption.required;
+                    UnityMcpPlugin.Instance.Save();
+                    toggleAuthorizationNone.SetValueWithoutNotify(false);
+                    SetTokenFieldsVisible(inputAuthorizationToken, tokenSection, true);
+                    InvalidateAndReloadAgentUI();
+                    RestartServerIfWasRunning(wasRunning);
+                }
+                else if (!toggleAuthorizationNone.value)
+                {
+                    toggleAuthorizationRequired.SetValueWithoutNotify(true);
+                }
+            });
+
+            inputAuthorizationToken.RegisterCallback<FocusOutEvent>(_ =>
+            {
+                var newToken = inputAuthorizationToken.value;
+                if (newToken == UnityMcpPlugin.Token)
+                    return;
+
+                var wasRunning = McpServerManager.IsRunning;
+                UnityMcpPlugin.Token = newToken;
+                UnityMcpPlugin.Instance.Save();
+                InvalidateAndReloadAgentUI();
+                RestartServerIfWasRunning(wasRunning);
+            });
+
+            btnGenerateToken.RegisterCallback<ClickEvent>(_ =>
+            {
+                var newToken = GenerateToken();
+                inputAuthorizationToken.SetValueWithoutNotify(newToken);
+
+                var wasRunning = McpServerManager.IsRunning;
+                UnityMcpPlugin.Token = newToken;
+                UnityMcpPlugin.Instance.Save();
+                InvalidateAndReloadAgentUI();
+                RestartServerIfWasRunning(wasRunning);
+            });
         }
 
         private McpServerStatus CombineMcpServerStatus(McpServerStatus status, bool isConnected)

@@ -12,10 +12,10 @@
 using System;
 using System.Security.Cryptography;
 using Extensions.Unity.PlayerPrefsEx;
+using Microsoft.Extensions.Logging;
 using R3;
 using UnityEngine;
 using UnityEngine.UIElements;
-using static com.IvanMurzak.McpPlugin.Common.Consts.MCP.Server;
 
 namespace com.IvanMurzak.Unity.MCP.Editor.UI
 {
@@ -25,19 +25,22 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
 
         private AiAgentConfigurator? currentAiAgentConfigurator;
 
+        private DropdownField? aiAgentDropdown;
+        private VisualElement? aiAgentContainer;
+
         void ConfigureAgents(VisualElement root)
         {
             // Get the dropdown element
-            var dropdown = root.Query<DropdownField>("aiAgentDropdown").First();
-            if (dropdown == null)
+            aiAgentDropdown = root.Query<DropdownField>("aiAgentDropdown").First();
+            if (aiAgentDropdown == null)
             {
                 Debug.LogError("aiAgentDropdown not found in UXML. Please ensure the dropdown element exists.");
                 return;
             }
 
             // Get the container where agent panels will be added
-            var container = root.Query<VisualElement>("ConfigureAgentsContainer").First();
-            if (container == null)
+            aiAgentContainer = root.Query<VisualElement>("ConfigureAgentsContainer").First();
+            if (aiAgentContainer == null)
             {
                 Debug.LogError("ConfigureAgentsContainer not found in UXML. Please ensure the container element exists.");
                 return;
@@ -45,7 +48,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
 
             // Get agent names from registry
             var agentNames = AiAgentConfiguratorRegistry.GetAgentNames();
-            dropdown.choices = agentNames;
+            aiAgentDropdown.choices = agentNames;
 
             // Load saved selection from PlayerPrefs
             var savedAiAgentId = selectedAiAgentId.Value;
@@ -60,14 +63,14 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
             // Set initial dropdown value without triggering callback
             if (agentNames.Count > 0)
             {
-                dropdown.SetValueWithoutNotify(agentNames[selectedIndex]);
+                aiAgentDropdown.SetValueWithoutNotify(agentNames[selectedIndex]);
             }
 
             // Load initial UI for selected agent
-            LoadAgentUI(container, selectedIndex);
+            LoadAgentUI(aiAgentContainer, selectedIndex);
 
             // Register callback for dropdown changes
-            dropdown.RegisterValueChangedCallback(evt =>
+            aiAgentDropdown.RegisterValueChangedCallback(evt =>
             {
                 var newIndex = agentNames.IndexOf(evt.newValue);
                 if (newIndex < 0) return;
@@ -77,120 +80,19 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                 selectedAiAgentId.Value = configurator.AgentId;
 
                 // Load UI for the newly selected agent
-                LoadAgentUI(container, newIndex);
+                LoadAgentUI(aiAgentContainer, newIndex);
             });
+        }
 
-            // Deployment mode toggles
-            var labelAuthorizationToken = root.Query<Label>("labelAuthorizationToken").First();
-            var toggleAuthorizationNone = root.Query<Toggle>("toggleAuthorizationNone").First();
-            var toggleAuthorizationRequired = root.Query<Toggle>("toggleAuthorizationRequired").First();
-            var inputRemoteToken = root.Query<TextField>("inputRemoteToken").First();
-            var tokenSection = root.Query<VisualElement>("tokenSection").First();
-            var btnGenerateToken = root.Query<Button>("btnGenerateToken").First();
-
-            if (toggleAuthorizationNone == null)
+        private void InvalidateAndReloadAgentUI()
+        {
+            currentAiAgentConfigurator?.Invalidate();
+            if (aiAgentContainer == null || aiAgentDropdown == null)
             {
-                Debug.LogError("toggleAuthorizationNone not found in UXML.");
+                Logger.LogError($"Cannot reload agent UI: {nameof(aiAgentContainer)} or {nameof(aiAgentDropdown)} is null.");
                 return;
             }
-            if (toggleAuthorizationRequired == null)
-            {
-                Debug.LogError("toggleAuthorizationRequired not found in UXML.");
-                return;
-            }
-            if (inputRemoteToken == null)
-            {
-                Debug.LogError("inputRemoteToken not found in UXML.");
-                return;
-            }
-            if (tokenSection == null)
-            {
-                Debug.LogError("tokenSection not found in UXML.");
-                return;
-            }
-            if (btnGenerateToken == null)
-            {
-                Debug.LogError("btnGenerateToken not found in UXML.");
-                return;
-            }
-
-            if (labelAuthorizationToken != null) labelAuthorizationToken.tooltip = Tooltip_LabelAuthorizationToken;
-            toggleAuthorizationNone.tooltip = Tooltip_ToggleAuthNone;
-            toggleAuthorizationRequired.tooltip = Tooltip_ToggleAuthRequired;
-            btnGenerateToken.tooltip = Tooltip_BtnGenerateToken;
-
-            var authOption = UnityMcpPlugin.AuthOption;
-            toggleAuthorizationNone.SetValueWithoutNotify(authOption == AuthOption.none);
-            toggleAuthorizationRequired.SetValueWithoutNotify(authOption == AuthOption.required);
-            inputRemoteToken.SetValueWithoutNotify(UnityMcpPlugin.Token ?? string.Empty);
-            SetTokenFieldsVisible(inputRemoteToken, tokenSection, authOption == AuthOption.required);
-
-            void InvalidateAndReloadAgentUI()
-            {
-                currentAiAgentConfigurator?.Invalidate();
-                LoadAgentUI(container, agentNames.IndexOf(dropdown.value));
-            }
-
-            toggleAuthorizationNone.RegisterValueChangedCallback(evt =>
-            {
-                if (evt.newValue)
-                {
-                    var wasRunning = McpServerManager.IsRunning && UnityMcpPlugin.TransportMethod != TransportMethod.stdio;
-                    UnityMcpPlugin.AuthOption = AuthOption.none;
-                    UnityMcpPlugin.Instance.Save();
-                    toggleAuthorizationRequired.SetValueWithoutNotify(false);
-                    SetTokenFieldsVisible(inputRemoteToken, tokenSection, false);
-                    InvalidateAndReloadAgentUI();
-                    RestartServerIfWasRunning(wasRunning);
-                }
-                else if (!toggleAuthorizationRequired.value)
-                {
-                    toggleAuthorizationNone.SetValueWithoutNotify(true);
-                }
-            });
-
-            toggleAuthorizationRequired.RegisterValueChangedCallback(evt =>
-            {
-                if (evt.newValue)
-                {
-                    var wasRunning = McpServerManager.IsRunning && UnityMcpPlugin.TransportMethod != TransportMethod.stdio;
-                    UnityMcpPlugin.AuthOption = AuthOption.required;
-                    UnityMcpPlugin.Instance.Save();
-                    toggleAuthorizationNone.SetValueWithoutNotify(false);
-                    SetTokenFieldsVisible(inputRemoteToken, tokenSection, true);
-                    InvalidateAndReloadAgentUI();
-                    RestartServerIfWasRunning(wasRunning);
-                }
-                else if (!toggleAuthorizationNone.value)
-                {
-                    toggleAuthorizationRequired.SetValueWithoutNotify(true);
-                }
-            });
-
-            inputRemoteToken.RegisterCallback<FocusOutEvent>(_ =>
-            {
-                var newToken = inputRemoteToken.value;
-                if (newToken == UnityMcpPlugin.Token)
-                    return;
-
-                var wasRunning = McpServerManager.IsRunning;
-                UnityMcpPlugin.Token = newToken;
-                UnityMcpPlugin.Instance.Save();
-                InvalidateAndReloadAgentUI();
-                RestartServerIfWasRunning(wasRunning);
-            });
-
-            btnGenerateToken.RegisterCallback<ClickEvent>(_ =>
-            {
-                var newToken = GenerateToken();
-                inputRemoteToken.SetValueWithoutNotify(newToken);
-
-                var wasRunning = McpServerManager.IsRunning;
-                UnityMcpPlugin.Token = newToken;
-                UnityMcpPlugin.Instance.Save();
-                InvalidateAndReloadAgentUI();
-                RestartServerIfWasRunning(wasRunning);
-            });
+            LoadAgentUI(aiAgentContainer, AiAgentConfiguratorRegistry.GetAgentNames().IndexOf(aiAgentDropdown.value));
         }
 
         private static void SetTokenFieldsVisible(TextField tokenField, VisualElement actionsRow, bool visible)
