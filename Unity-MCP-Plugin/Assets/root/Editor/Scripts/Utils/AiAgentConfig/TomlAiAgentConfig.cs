@@ -289,6 +289,8 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Utils
                 (bool[] e, bool[] a) => e.Length == a.Length && e.Zip(a, (x, y) => x == y).All(match => match),
                 (int e, int a) => e == a,
                 (int[] e, int[] a) => e.Length == a.Length && e.Zip(a, (x, y) => x == y).All(match => match),
+                (Dictionary<string, string> e, Dictionary<string, string> a) =>
+                    e.Count == a.Count && e.All(kv => a.TryGetValue(kv.Key, out var v) && AreStringValuesEquivalent(comparison, kv.Value, v)),
                 _ => false
             };
         }
@@ -343,6 +345,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Utils
                 int[] arr => $"{key} = [{string.Join(",", arr)}]",
                 bool b => $"{key} = {b.ToString().ToLower()}",
                 bool[] arr => $"{key} = [{string.Join(",", arr.Select(v => v.ToString().ToLower()))}]",
+                Dictionary<string, string> dict => FormatTomlInlineTable(key, dict),
                 RawTomlValue raw => $"{key} = {raw.Value}",
                 _ => throw new InvalidOperationException($"Unsupported TOML value type: {value.GetType()}")
             };
@@ -377,6 +380,15 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Utils
                     if (stringValue != null)
                         props[key] = stringValue;
                 }
+                else if (rawValue.StartsWith("{"))
+                {
+                    // Inline table value: { "KEY" = "value", ... }
+                    var dictValue = ParseTomlInlineTable(rawValue);
+                    if (dictValue != null)
+                        props[key] = dictValue;
+                    else
+                        props[key] = new RawTomlValue(rawValue);
+                }
                 else
                 {
                     // Non-string, non-array scalar - strip inline comment first
@@ -391,6 +403,106 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Utils
                 }
             }
             return props;
+        }
+
+        private static string FormatTomlInlineTable(string key, Dictionary<string, string> dict)
+        {
+            var pairs = string.Join(", ", dict.Select(kv =>
+                "\"" + EscapeTomlString(kv.Key) + "\" = \"" + EscapeTomlString(kv.Value) + "\""));
+            return key + " = { " + pairs + " }";
+        }
+
+        /// <summary>
+        /// Parses a TOML inline table such as <c>{ "KEY" = "value", KEY2 = "v2" }</c>
+        /// into a <see cref="Dictionary{TKey,TValue}"/> of string pairs.
+        /// Returns null if the input cannot be parsed.
+        /// </summary>
+        private static Dictionary<string, string>? ParseTomlInlineTable(string rawValue)
+        {
+            var trimmed = rawValue.Trim();
+            var closingBrace = trimmed.LastIndexOf('}');
+            if (!trimmed.StartsWith("{") || closingBrace < 0)
+                return null;
+
+            var content = trimmed[1..closingBrace].Trim();
+            var result = new Dictionary<string, string>();
+            if (string.IsNullOrEmpty(content))
+                return result;
+
+            var pos = 0;
+            while (pos < content.Length)
+            {
+                // Skip whitespace/commas
+                while (pos < content.Length && (char.IsWhiteSpace(content[pos]) || content[pos] == ','))
+                    pos++;
+                if (pos >= content.Length) break;
+
+                // Parse key (quoted or bare)
+                string? entryKey;
+                if (content[pos] == '"')
+                    entryKey = ReadQuotedString(content, ref pos);
+                else
+                {
+                    var start = pos;
+                    while (pos < content.Length && content[pos] != '=' && content[pos] != ',')
+                        pos++;
+                    entryKey = content[start..pos].Trim();
+                }
+                if (entryKey == null) return null;
+
+                // Skip whitespace and '='
+                while (pos < content.Length && char.IsWhiteSpace(content[pos])) pos++;
+                if (pos >= content.Length || content[pos] != '=') return null;
+                pos++; // consume '='
+                while (pos < content.Length && char.IsWhiteSpace(content[pos])) pos++;
+
+                // Parse value (quoted or bare)
+                string? entryValue;
+                if (pos < content.Length && content[pos] == '"')
+                    entryValue = ReadQuotedString(content, ref pos);
+                else
+                {
+                    var start = pos;
+                    while (pos < content.Length && content[pos] != ',')
+                        pos++;
+                    entryValue = content[start..pos].Trim();
+                }
+                if (entryValue == null) return null;
+
+                result[entryKey] = entryValue;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Reads a double-quoted TOML string starting at <paramref name="pos"/> and advances past the closing quote.
+        /// Returns null if the string is malformed.
+        /// </summary>
+        private static string? ReadQuotedString(string s, ref int pos)
+        {
+            if (pos >= s.Length || s[pos] != '"') return null;
+            pos++; // skip opening quote
+            var sb = new StringBuilder();
+            while (pos < s.Length)
+            {
+                if (s[pos] == '\\' && pos + 1 < s.Length)
+                {
+                    pos++;
+                    sb.Append(s[pos]);
+                    pos++;
+                }
+                else if (s[pos] == '"')
+                {
+                    pos++; // skip closing quote
+                    return sb.ToString();
+                }
+                else
+                {
+                    sb.Append(s[pos]);
+                    pos++;
+                }
+            }
+            return null; // unclosed quote
         }
 
         private static string EscapeTomlString(string value)
