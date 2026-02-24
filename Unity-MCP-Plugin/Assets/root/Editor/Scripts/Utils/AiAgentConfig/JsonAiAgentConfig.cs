@@ -23,6 +23,8 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Utils
 {
     public class JsonAiAgentConfig : AiAgentConfig
     {
+        private static readonly JsonSerializerOptions WriteOptions = new() { WriteIndented = true };
+
         private readonly Dictionary<string, (JsonNode value, bool required, ValueComparisonMode comparison)> _properties = new();
         private readonly HashSet<string> _propertiesToRemove = new();
 
@@ -195,7 +197,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Utils
                 }
 
                 // Write back to file
-                File.WriteAllText(ConfigPath, rootObj.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+                File.WriteAllText(ConfigPath, rootObj.ToJsonString(WriteOptions));
 
                 return IsConfigured();
             }
@@ -225,7 +227,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Utils
                     return false;
 
                 targetObj.Remove(DefaultMcpServerName);
-                File.WriteAllText(ConfigPath, rootObj.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+                File.WriteAllText(ConfigPath, rootObj.ToJsonString(WriteOptions));
                 return true;
             }
             catch (Exception ex)
