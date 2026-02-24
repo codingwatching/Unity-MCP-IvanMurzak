@@ -46,25 +46,25 @@
                         </ui:VisualElement>
                         <!-- Row 2: Transport -->
                         <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: space-between; margin-top: 2px; margin-bottom: 2px;">
-                            <ui:Label text="Transport" class="section-desc" style="margin-bottom: 0;" />
+                            <ui:Label name="labelTransport" text="Transport" class="section-desc" style="margin-bottom: 0;" />
                             <ui:VisualElement style="flex-direction: row;">
-                                <ui:Toggle name="toggleOptionStdio" label="stdio" class="toggle-text-button" tooltip="Configure AI agent to communicate over STDIO (NOT RECOMMENDED)" />
-                                <ui:Toggle name="toggleOptionHttp" label="http" class="toggle-text-button" tooltip="Configure AI agent to communicate over HTTP (RECOMMENDED)" />
+                                <ui:Toggle name="toggleOptionStdio" label="stdio" class="toggle-text-button" />
+                                <ui:Toggle name="toggleOptionHttp" label="http" class="toggle-text-button" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <!-- Row 3: Authorization -->
                         <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: space-between; margin-top: 2px; margin-bottom: 2px;">
-                            <ui:Label text="Authorization Token" class="section-desc" style="margin-bottom: 0;" />
+                            <ui:Label name="labelAuthorizationToken" text="Authorization Token" class="section-desc" style="margin-bottom: 0;" />
                             <ui:VisualElement style="flex-direction: row;">
-                                <ui:Toggle name="toggleAuthorizationNone" label="none" class="toggle-text-button" tooltip="Local deployment: MCP server runs on the same machine as Unity" />
-                                <ui:Toggle name="toggleAuthorizationRequired" label="required" class="toggle-text-button" tooltip="Remote deployment: MCP server runs on a remote machine" />
+                                <ui:Toggle name="toggleAuthorizationNone" label="none" class="toggle-text-button" />
+                                <ui:Toggle name="toggleAuthorizationRequired" label="required" class="toggle-text-button" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <!-- Row 4: Authorization Token -->
                         <ui:VisualElement name="tokenSection" style="flex-direction: column; margin-top: 2px; margin-bottom: 2px;">
                             <ui:VisualElement style="flex-direction: row;">
                                 <ui:TextField name="inputRemoteToken" label="" placeholder-text="Token" readonly="true" class="token-input" />
-                                <ui:Button name="btnGenerateToken" text="New" class="btn-compact" tooltip="Generate a new random token for remote deployment" />
+                                <ui:Button name="btnGenerateToken" text="New" class="btn-compact" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
