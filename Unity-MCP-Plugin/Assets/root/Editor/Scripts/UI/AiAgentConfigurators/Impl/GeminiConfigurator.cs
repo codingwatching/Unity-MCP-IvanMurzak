@@ -98,8 +98,6 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
             manualStepsOption1!.Add(TemplateLabelDescription("3. Start Gemini"));
             manualStepsOption1!.Add(TemplateTextFieldReadOnly("gemini --debug"));
 
-            ContainerStdio!.Add(TemplateWarningLabel("REQUIRED: Use --debug flag when starting Gemini is important, it helps MCP server to work properly with Gemini in stdio transport mode."));
-
             ContainerStdio!.Add(manualStepsOption1);
 
             var manualStepsOption2 = TemplateFoldout("Manual Configuration Steps - Option 2");
