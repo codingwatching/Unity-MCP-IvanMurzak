@@ -22,7 +22,7 @@ namespace com.IvanMurzak.Unity.MCP
     public partial class UnityMcpPlugin
     {
         public static string ResourcesFileName => "AI-Game-Developer-Config";
-        public static string AssetsFilePath => $"Assets/Resources/{ResourcesFileName}.json";
+        public static string AssetsFilePath => $"UserSettings/{ResourcesFileName}.json";
 #if UNITY_EDITOR
         public static TextAsset AssetFile => UnityEditor.AssetDatabase.LoadAssetAtPath<TextAsset>(AssetsFilePath);
         public static void InvalidateAssetFile() => UnityEditor.AssetDatabase.ImportAsset(AssetsFilePath, UnityEditor.ImportAssetOptions.ForceUpdate);

@@ -9,7 +9,6 @@
 */
 
 #nullable enable
-using System;
 using System.Linq;
 using com.IvanMurzak.McpPlugin;
 using com.IvanMurzak.ReflectorNet;
@@ -102,8 +101,7 @@ namespace com.IvanMurzak.Unity.MCP
 
         protected virtual IMcpPlugin BuildMcpPlugin(McpPlugin.Common.Version version, Reflector reflector, ILoggerProvider? loggerProvider = null)
         {
-            _logger.LogTrace("{method} called.",
-                nameof(BuildMcpPlugin));
+            _logger.LogTrace("{method} called.", nameof(BuildMcpPlugin));
 
             var assemblies = AssemblyUtils.AllAssemblies;
             var mcpPluginBuilder = new McpPluginBuilder(version, loggerProvider)
@@ -143,16 +141,14 @@ namespace com.IvanMurzak.Unity.MCP
 
             var mcpPlugin = mcpPluginBuilder.Build(reflector);
 
-            _logger.LogTrace("{method} completed.",
-                nameof(BuildMcpPlugin));
+            _logger.LogTrace("{method} completed.", nameof(BuildMcpPlugin));
 
             return mcpPlugin;
         }
 
         protected virtual void ApplyConfigToMcpPlugin(IMcpPlugin mcpPlugin)
         {
-            _logger.LogTrace("{method} called.",
-                nameof(ApplyConfigToMcpPlugin));
+            _logger.LogTrace("{method} called.", nameof(ApplyConfigToMcpPlugin));
 
             // Enable/Disable tools based on config
             var toolManager = mcpPlugin.McpManager.ToolManager;
@@ -196,8 +192,7 @@ namespace com.IvanMurzak.Unity.MCP
                 }
             }
 
-            _logger.LogTrace("{method} completed.",
-                nameof(ApplyConfigToMcpPlugin));
+            _logger.LogTrace("{method} completed.", nameof(ApplyConfigToMcpPlugin));
         }
     }
 }
