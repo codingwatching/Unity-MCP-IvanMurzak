@@ -45,8 +45,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
             $"{Args.Port}={UnityMcpPlugin.Port}",
             $"{Args.PluginTimeout}={UnityMcpPlugin.TimeoutMs}",
             $"{Args.ClientTransportMethod}={TransportMethod.stdio}",
-            $"{Args.Authorization}={UnityMcpPlugin.AuthOption}",
-            $"{Args.Token}={UnityMcpPlugin.Token}"
+            $"{Args.Authorization}={UnityMcpPlugin.AuthOption}"
         }, requiredForConfiguration: true)
         .SetProperty("tool_timeout_sec", 300, requiredForConfiguration: false) // Optional: Set a longer tool timeout for Codex
         .SetPropertyToRemove("url")
@@ -68,8 +67,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
             $"{Args.Port}={UnityMcpPlugin.Port}",
             $"{Args.PluginTimeout}={UnityMcpPlugin.TimeoutMs}",
             $"{Args.ClientTransportMethod}={TransportMethod.stdio}",
-            $"{Args.Authorization}={UnityMcpPlugin.AuthOption}",
-            $"{Args.Token}={UnityMcpPlugin.Token}"
+            $"{Args.Authorization}={UnityMcpPlugin.AuthOption}"
         }, requiredForConfiguration: true)
         .SetProperty("tool_timeout_sec", 300, requiredForConfiguration: false) // Optional: Set a longer tool timeout for Codex
         .SetPropertyToRemove("url")

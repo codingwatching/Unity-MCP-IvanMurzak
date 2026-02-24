@@ -976,7 +976,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor
                 $"{Args.ClientTransportMethod}={transportMethod} " +
                 $"{Args.Authorization}={deploymentMode}";
 
-            if (!string.IsNullOrEmpty(token))
+            if (deploymentMode == AuthOption.required && !string.IsNullOrEmpty(token))
                 args += $" {Args.Token}={token}";
 
             return args;

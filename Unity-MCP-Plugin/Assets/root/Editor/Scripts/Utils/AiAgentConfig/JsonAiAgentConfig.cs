@@ -226,7 +226,34 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Utils
                 if (targetObj == null)
                     return false;
 
-                targetObj.Remove(DefaultMcpServerName);
+                var removed = false;
+
+                if (targetObj[DefaultMcpServerName] != null)
+                {
+                    targetObj.Remove(DefaultMcpServerName);
+                    removed = true;
+                }
+
+                foreach (var name in DeprecatedMcpServerNames)
+                {
+                    if (targetObj[name] != null)
+                    {
+                        targetObj.Remove(name);
+                        removed = true;
+                    }
+                }
+
+                var duplicateKeys = FindDuplicateServerEntryKeys(targetObj);
+                if (duplicateKeys.Count > 0)
+                {
+                    foreach (var key in duplicateKeys)
+                        targetObj.Remove(key);
+                    removed = true;
+                }
+
+                if (!removed)
+                    return false;
+
                 File.WriteAllText(ConfigPath, rootObj.ToJsonString(WriteOptions));
                 return true;
             }
@@ -259,7 +286,14 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Utils
                 if (targetObj == null)
                     return false;
 
-                return targetObj[DefaultMcpServerName] != null;
+                if (targetObj[DefaultMcpServerName] != null)
+                    return true;
+
+                foreach (var name in DeprecatedMcpServerNames)
+                    if (targetObj[name] != null)
+                        return true;
+
+                return FindDuplicateServerEntryKeys(targetObj).Count > 0;
             }
             catch (Exception ex)
             {
@@ -412,12 +446,11 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Utils
         }
 
         /// <summary>
-        /// Removes sibling server entries that represent the same server under a different name,
-        /// identified by matching identity key property values (e.g. "command", "url", "serverUrl").
+        /// Returns the keys of sibling server entries that represent the same server under a different
+        /// name, identified by matching identity key property values (e.g. "command", "url", "serverUrl").
         /// </summary>
-        private void RemoveDuplicateServerEntries(JsonObject targetObj)
+        private List<string> FindDuplicateServerEntryKeys(JsonObject targetObj)
         {
-            // Collect identity values we're about to write
             var ourIdentityValues = new Dictionary<string, (JsonNode value, ValueComparisonMode comparison)>();
             foreach (var identityKey in _identityKeys)
             {
@@ -426,10 +459,9 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Utils
             }
 
             if (ourIdentityValues.Count == 0)
-                return;
+                return new List<string>();
 
-            // Find sibling entries that share any identity value
-            var keysToRemove = new List<string>();
+            var keys = new List<string>();
             foreach (var kv in targetObj)
             {
                 if (kv.Key == DefaultMcpServerName)
@@ -444,13 +476,22 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Utils
                     var existingValue = entry[identity.Key];
                     if (existingValue != null && AreJsonValuesEquivalent(identity.Value.comparison, identity.Value.value, existingValue))
                     {
-                        keysToRemove.Add(kv.Key);
+                        keys.Add(kv.Key);
                         break;
                     }
                 }
             }
 
-            foreach (var key in keysToRemove)
+            return keys;
+        }
+
+        /// <summary>
+        /// Removes sibling server entries that represent the same server under a different name,
+        /// identified by matching identity key property values (e.g. "command", "url", "serverUrl").
+        /// </summary>
+        private void RemoveDuplicateServerEntries(JsonObject targetObj)
+        {
+            foreach (var key in FindDuplicateServerEntryKeys(targetObj))
                 targetObj.Remove(key);
         }
 

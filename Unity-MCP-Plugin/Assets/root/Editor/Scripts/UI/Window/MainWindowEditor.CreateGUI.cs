@@ -594,15 +594,15 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                 return;
             }
 
-            var ncpManagerHub = mcpPluginInstance.McpManagerHub;
-            if (ncpManagerHub == null)
+            var mcpManagerHub = mcpPluginInstance.McpManagerHub;
+            if (mcpManagerHub == null)
             {
                 Logger.LogDebug("Cannot fetch MCP server data: McpManagerHub is null");
                 return;
             }
 
             var fetchTime = DateTime.UtcNow;
-            var task = ncpManagerHub.GetMcpServerData();
+            var task = mcpManagerHub.GetMcpServerData();
             if (task == null)
             {
                 Logger.LogDebug("Cannot fetch MCP server data: GetMcpServerData returned null");

@@ -1033,6 +1033,127 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
             yield return null;
         }
 
+        [UnityTest]
+        public IEnumerator IsDetected_DeprecatedName_ReturnsTrue()
+        {
+            // Arrange - file only contains the deprecated section name
+            var existingToml = "[mcp_servers.Unity-MCP]\ncommand = \"/some/path\"\n";
+            File.WriteAllText(tempConfigPath, existingToml);
+            var config = CreateStdioConfig(tempConfigPath);
+
+            // Act & Assert
+            Assert.IsTrue(config.IsDetected(), "IsDetected should return true when only the deprecated name is present");
+
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator IsDetected_DuplicateByCommand_ReturnsTrue()
+        {
+            // Arrange - file only contains a duplicate section matching by command
+            var executable = McpServerManager.ExecutableFullPath.Replace('\\', '/');
+            var existingToml = $"[mcp_servers.my-custom-name]\ncommand = \"{executable}\"\nargs = [\"--old-arg\"]\n";
+            File.WriteAllText(tempConfigPath, existingToml);
+            var config = CreateStdioConfig(tempConfigPath);
+
+            // Act & Assert
+            Assert.IsTrue(config.IsDetected(), "IsDetected should return true when a duplicate section with the same command is present");
+
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator IsDetected_DuplicateByUrl_ReturnsTrue()
+        {
+            // Arrange - file only contains a duplicate section matching by url
+            var url = UnityMcpPlugin.Host;
+            var existingToml = $"[mcp_servers.my-custom-name]\nurl = \"{url}\"\n";
+            File.WriteAllText(tempConfigPath, existingToml);
+            var config = CreateHttpConfig(tempConfigPath);
+
+            // Act & Assert
+            Assert.IsTrue(config.IsDetected(), "IsDetected should return true when a duplicate section with the same url is present");
+
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator Unconfigure_DeprecatedName_RemovesIt()
+        {
+            // Arrange - file only contains the deprecated section name
+            var existingToml = "[mcp_servers.Unity-MCP]\ncommand = \"/some/path\"\n";
+            File.WriteAllText(tempConfigPath, existingToml);
+            var config = CreateStdioConfig(tempConfigPath);
+
+            // Act
+            var result = config.Unconfigure();
+
+            // Assert
+            Assert.IsTrue(result, "Unconfigure should return true when deprecated section was removed");
+            var content = File.ReadAllText(tempConfigPath);
+            Assert.IsFalse(content.Contains("[mcp_servers.Unity-MCP]"), "Deprecated section should be removed");
+
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator Unconfigure_DuplicateByCommand_RemovesIt()
+        {
+            // Arrange - file only contains a duplicate section with the same command
+            var executable = McpServerManager.ExecutableFullPath.Replace('\\', '/');
+            var existingToml = $"[mcp_servers.my-custom-name]\ncommand = \"{executable}\"\nargs = [\"--old-arg\"]\n";
+            File.WriteAllText(tempConfigPath, existingToml);
+            var config = CreateStdioConfig(tempConfigPath);
+
+            // Act
+            var result = config.Unconfigure();
+
+            // Assert
+            Assert.IsTrue(result, "Unconfigure should return true when a duplicate section was removed");
+            var content = File.ReadAllText(tempConfigPath);
+            Assert.IsFalse(content.Contains("[mcp_servers.my-custom-name]"), "Duplicate section should be removed");
+
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator Unconfigure_DeprecatedAndCurrentPresent_RemovesBoth()
+        {
+            // Arrange - file contains both current and deprecated section names
+            var existingToml = "[mcp_servers.Unity-MCP]\ncommand = \"/old/path\"\n\n" +
+                               $"[mcp_servers.{AiAgentConfig.DefaultMcpServerName}]\ncommand = \"/some/path\"\n";
+            File.WriteAllText(tempConfigPath, existingToml);
+            var config = CreateStdioConfig(tempConfigPath);
+
+            // Act
+            var result = config.Unconfigure();
+
+            // Assert
+            Assert.IsTrue(result, "Unconfigure should return true when sections were removed");
+            var content = File.ReadAllText(tempConfigPath);
+            Assert.IsFalse(content.Contains("[mcp_servers.Unity-MCP]"), "Deprecated section should be removed");
+            Assert.IsFalse(content.Contains($"[mcp_servers.{AiAgentConfig.DefaultMcpServerName}]"), "Current section should be removed");
+
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator Unconfigure_NothingPresent_ReturnsFalse()
+        {
+            // Arrange - file has no known sections
+            var existingToml = "[mcp_servers.other-server]\ncommand = \"completely-different-command\"\n";
+            File.WriteAllText(tempConfigPath, existingToml);
+            var config = CreateStdioConfig(tempConfigPath);
+
+            // Act
+            var result = config.Unconfigure();
+
+            // Assert
+            Assert.IsFalse(result, "Unconfigure should return false when nothing was present to remove");
+
+            yield return null;
+        }
+
         #endregion
 
         #region Inline Comments and Unknown Types

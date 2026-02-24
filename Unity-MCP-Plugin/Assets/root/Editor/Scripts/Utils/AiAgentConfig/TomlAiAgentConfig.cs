@@ -16,6 +16,7 @@ using System.Linq;
 using System.Text;
 using com.IvanMurzak.McpPlugin.Common;
 using UnityEngine;
+using static com.IvanMurzak.McpPlugin.Common.Consts.MCP.Server;
 
 namespace com.IvanMurzak.Unity.MCP.Editor.Utils
 {
@@ -93,8 +94,18 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Utils
 
         public override void ApplyStdioAuthorization(bool isRequired, string? token)
         {
-            // TOML STDIO config format does not currently support injecting
-            // the token argument. Implement when TOML STDIO auth is needed.
+            if (!_properties.TryGetValue("args", out var argsProp) || argsProp.value is not string[] currentArgs)
+                return;
+
+            var tokenPrefix = $"{Args.Token}=";
+            var filtered = currentArgs
+                .Where(arg => !arg.StartsWith(tokenPrefix, StringComparison.Ordinal))
+                .ToList();
+
+            if (isRequired && !string.IsNullOrEmpty(token))
+                filtered.Add($"{tokenPrefix}{token}");
+
+            SetProperty("args", filtered.ToArray(), argsProp.required, argsProp.comparison);
         }
 
         public override bool Configure()
@@ -191,12 +202,35 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Utils
             {
                 var sectionName = $"{BodyPath}.{DefaultMcpServerName}";
                 var lines = File.ReadAllLines(ConfigPath).ToList();
-                var sectionIndex = FindTomlSection(lines, sectionName);
-                if (sectionIndex < 0)
-                    return false;
+                var changed = false;
 
-                var sectionEnd = FindSectionEnd(lines, sectionIndex);
-                lines.RemoveRange(sectionIndex, sectionEnd - sectionIndex);
+                var sectionIndex = FindTomlSection(lines, sectionName);
+                if (sectionIndex >= 0)
+                {
+                    var sectionEnd = FindSectionEnd(lines, sectionIndex);
+                    lines.RemoveRange(sectionIndex, sectionEnd - sectionIndex);
+                    changed = true;
+                }
+
+                foreach (var deprecatedName in DeprecatedMcpServerNames)
+                {
+                    var deprecatedSection = $"{BodyPath}.{deprecatedName}";
+                    var deprecatedIndex = FindTomlSection(lines, deprecatedSection);
+                    if (deprecatedIndex >= 0)
+                    {
+                        var deprecatedEnd = FindSectionEnd(lines, deprecatedIndex);
+                        lines.RemoveRange(deprecatedIndex, deprecatedEnd - deprecatedIndex);
+                        changed = true;
+                    }
+                }
+
+                var countBefore = lines.Count;
+                RemoveDuplicateServerSections(lines, sectionName);
+                if (lines.Count != countBefore)
+                    changed = true;
+
+                if (!changed)
+                    return false;
 
                 File.WriteAllText(ConfigPath, string.Join(Environment.NewLine, lines));
                 return true;
@@ -218,7 +252,14 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Utils
             {
                 var lines = File.ReadAllLines(ConfigPath).ToList();
                 var sectionName = $"{BodyPath}.{DefaultMcpServerName}";
-                return FindTomlSection(lines, sectionName) >= 0;
+                if (FindTomlSection(lines, sectionName) >= 0)
+                    return true;
+
+                foreach (var deprecatedName in DeprecatedMcpServerNames)
+                    if (FindTomlSection(lines, $"{BodyPath}.{deprecatedName}") >= 0)
+                        return true;
+
+                return FindDuplicateServerSectionIndices(lines, sectionName).Count > 0;
             }
             catch (Exception ex)
             {
@@ -738,22 +779,21 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Utils
         }
 
         /// <summary>
-        /// Removes sibling TOML sections that represent the same server under a different name,
-        /// identified by matching identity key property values (e.g. "command", "url", "serverUrl").
+        /// Returns the (start, end) line index pairs of sibling TOML sections that represent the same
+        /// server under a different name, identified by matching identity key property values
+        /// (e.g. "command", "url", "serverUrl"). Pairs are in document order (top to bottom).
         /// </summary>
-        private void RemoveDuplicateServerSections(List<string> lines, string ownSectionName)
+        private List<(int start, int end)> FindDuplicateServerSectionIndices(List<string> lines, string ownSectionName)
         {
-            // Collect identity values we're about to write
             var ourIdentityValues = _identityKeys
                 .Where(key => _properties.TryGetValue(key, out var prop) && prop.value is string)
                 .ToDictionary(key => key, key => ((string)_properties[key].value, _properties[key].comparison));
 
             if (ourIdentityValues.Count == 0)
-                return;
+                return new List<(int, int)>();
 
-            // Find all sibling sections under the same body path
             var bodyPrefix = $"[{BodyPath}.";
-            var sectionsToRemove = new List<(int start, int end)>();
+            var result = new List<(int start, int end)>();
 
             for (int i = 0; i < lines.Count; i++)
             {
@@ -761,7 +801,6 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Utils
                 if (!trimmed.StartsWith(bodyPrefix) || !trimmed.EndsWith("]"))
                     continue;
 
-                // Extract section name and skip our own section
                 var fullSectionName = trimmed[1..^1];
                 if (fullSectionName == ownSectionName)
                     continue;
@@ -769,15 +808,23 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Utils
                 var sectionEnd = FindSectionEnd(lines, i);
                 var props = ParseSectionProperties(lines, i + 1, sectionEnd);
 
-                // Check if any identity property matches
                 if (ourIdentityValues.Any(identity =>
                         props.TryGetValue(identity.Key, out var existingValue)
                         && existingValue is string existingStr
                         && AreStringValuesEquivalent(identity.Value.comparison, identity.Value.Item1, existingStr)))
-                    sectionsToRemove.Add((i, sectionEnd));
+                    result.Add((i, sectionEnd));
             }
 
-            // Remove from bottom to top to preserve indices
+            return result;
+        }
+
+        /// <summary>
+        /// Removes sibling TOML sections that represent the same server under a different name,
+        /// identified by matching identity key property values (e.g. "command", "url", "serverUrl").
+        /// </summary>
+        private void RemoveDuplicateServerSections(List<string> lines, string ownSectionName)
+        {
+            var sectionsToRemove = FindDuplicateServerSectionIndices(lines, ownSectionName);
             for (int i = sectionsToRemove.Count - 1; i >= 0; i--)
             {
                 var (start, end) = sectionsToRemove[i];
