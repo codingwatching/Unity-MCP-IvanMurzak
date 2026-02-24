@@ -56,6 +56,7 @@ namespace com.IvanMurzak.Unity.MCP
                 Tools = DefaultTools;
                 Prompts = DefaultPrompts;
                 Resources = DefaultResources;
+                Token = GenerateToken();
                 return this;
             }
 
