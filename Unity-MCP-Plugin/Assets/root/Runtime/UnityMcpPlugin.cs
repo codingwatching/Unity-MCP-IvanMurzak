@@ -11,55 +11,32 @@
 #nullable enable
 
 using System;
-using com.IvanMurzak.McpPlugin;
-using com.IvanMurzak.ReflectorNet;
+using System.Threading;
 using R3;
 
 namespace com.IvanMurzak.Unity.MCP
 {
+    using LogLevel = Runtime.Utils.LogLevel;
+
     public partial class UnityMcpPlugin : IDisposable
     {
         public const string Version = "0.48.1";
+
+        private static int _singletonCount = 0;
+        public static bool HasAnyInstance => _singletonCount > 0;
+        protected static void IncrementSingletonCount() => Interlocked.Increment(ref _singletonCount);
+        protected static void DecrementSingletonCount() => Interlocked.Decrement(ref _singletonCount);
+
+        private static LogLevel _configuredLogLevel = LogLevel.Warning;
+        // Uses direct enum comparison: configured threshold <= requested level means enabled
+        public static bool IsLogEnabled(LogLevel level) => _configuredLogLevel <= level;
+        public static void ApplyLogLevel(LogLevel level) => _configuredLogLevel = level;
 
         protected readonly CompositeDisposable _disposables = new();
 
         public UnityLogCollector? LogCollector { get; protected set; } = null;
 
-        public Reflector? Reflector => McpPluginInstance?.McpManager.Reflector;
-        public McpPlugin.IToolManager? Tools => McpPluginInstance?.McpManager.ToolManager;
-        public McpPlugin.IPromptManager? Prompts => McpPluginInstance?.McpManager.PromptManager;
-        public McpPlugin.IResourceManager? Resources => McpPluginInstance?.McpManager.ResourceManager;
-
-        protected UnityMcpPlugin(UnityConnectionConfig? config = null)
-        {
-            if (config == null)
-            {
-                config = GetOrCreateConfig(out var wasCreated);
-                unityConnectionConfig = config ?? throw new InvalidOperationException($"{nameof(UnityConnectionConfig)} is null");
-                if (wasCreated)
-                    Save();
-            }
-            else
-            {
-                unityConnectionConfig = config ?? throw new InvalidOperationException($"{nameof(UnityConnectionConfig)} is null");
-            }
-        }
-
-        public void Validate()
-        {
-            var changed = false;
-            var data = unityConnectionConfig ??= new UnityConnectionConfig();
-
-            if (string.IsNullOrEmpty(data.Host))
-            {
-                data.Host = UnityConnectionConfig.DefaultHost;
-                changed = true;
-            }
-
-            // Data was changed during validation, need to notify subscribers
-            if (changed)
-                NotifyChanged(data);
-        }
+        protected UnityMcpPlugin() { }
 
         public void AddUnityLogCollector(ILogStorage logStorage)
         {
@@ -81,26 +58,6 @@ namespace com.IvanMurzak.Unity.MCP
             AddUnityLogCollector(logStorageProvider());
         }
 
-        public void DisposeMcpPluginInstance()
-        {
-            IMcpPlugin? oldInstance;
-            lock (buildMutex)
-            {
-                oldInstance = mcpPluginInstance;
-                mcpPluginInstance = null;
-            }
-
-            if (oldInstance == null)
-                return;
-
-            // Dispose on a background thread to avoid blocking Unity's main thread.
-            // The dispose path calls ConnectionManager.DisconnectImmediate() which
-            // internally blocks on a semaphore (_gate) held by a pending Connect()
-            // task whose continuation is queued on the main thread SynchronizationContext —
-            // a deadlock if we block the main thread here.
-            _ = System.Threading.Tasks.Task.Run(() => oldInstance.Dispose());
-        }
-
         public void DisposeLogCollector()
         {
             LogCollector?.Save();
@@ -108,12 +65,50 @@ namespace com.IvanMurzak.Unity.MCP
             LogCollector = null;
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             _disposables.Dispose();
             // LogCollector is disposed by _disposables
             LogCollector = null;
-            DisposeMcpPluginInstance();
+        }
+
+        /// <summary>
+        /// Generates a cryptographically random URL-safe token.
+        /// Used by <see cref="UnityConnectionConfig.SetDefault"/> for initial token generation.
+        /// </summary>
+        public static string GenerateToken()
+        {
+            var bytes = new byte[32];
+            using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+            rng.GetBytes(bytes);
+            return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+        }
+
+        /// <summary>
+        /// Generate a deterministic TCP port based on current directory.
+        /// Uses SHA256 hash for better distribution and less collisions.
+        /// Port range: 50000-59999 (less commonly used dynamic ports).
+        /// </summary>
+        public static int GeneratePortFromDirectory()
+        {
+            const int MinPort = 50000; // Higher range to avoid common dynamic ports
+            const int MaxPort = 59999;
+            const int PortRange = MaxPort - MinPort + 1;
+
+            var currentDir = System.Environment.CurrentDirectory.ToLowerInvariant();
+
+            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            {
+                var hashBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(currentDir));
+
+                // Use first 4 bytes to create an integer
+                var hash = System.BitConverter.ToInt32(hashBytes, 0);
+
+                // Map to port range
+                var port = MinPort + (System.Math.Abs(hash) % PortRange);
+
+                return port;
+            }
         }
     }
 }

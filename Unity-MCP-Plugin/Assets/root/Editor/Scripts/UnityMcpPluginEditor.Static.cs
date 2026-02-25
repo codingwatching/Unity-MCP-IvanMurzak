@@ -27,13 +27,13 @@ namespace com.IvanMurzak.Unity.MCP
     using LogLevel = com.IvanMurzak.Unity.MCP.Runtime.Utils.LogLevel;
     using MicrosoftLogLevel = Microsoft.Extensions.Logging.LogLevel;
 
-    public partial class UnityMcpPlugin
+    public partial class UnityMcpPluginEditor
     {
         static readonly Subject<UnityConnectionConfig> _onConfigChanged = new Subject<UnityConnectionConfig>();
-        static readonly ILogger _logger = UnityLoggerFactory.LoggerFactory.CreateLogger<UnityMcpPlugin>();
+        static readonly ILogger _logger = UnityLoggerFactory.LoggerFactory.CreateLogger<UnityMcpPluginEditor>();
         static readonly object _instanceMutex = new();
 
-        static UnityMcpPlugin instance = null!;
+        static UnityMcpPluginEditor instance = null!;
 
         public static bool HasInstance
         {
@@ -45,7 +45,7 @@ namespace com.IvanMurzak.Unity.MCP
                 }
             }
         }
-        public static UnityMcpPlugin Instance
+        public static UnityMcpPluginEditor Instance
         {
             get
             {
@@ -63,10 +63,10 @@ namespace com.IvanMurzak.Unity.MCP
             {
                 if (instance == null)
                 {
-                    instance = new UnityMcpPlugin();
+                    instance = new UnityMcpPluginEditor();
                     if (instance == null)
                     {
-                        _logger.LogWarning("{method}: ConnectionConfig instance is null",
+                        _logger.LogWarning("{method}: UnityMcpPluginEditor instance is null",
                             nameof(InitSingletonIfNeeded));
                         return;
                     }
@@ -74,14 +74,13 @@ namespace com.IvanMurzak.Unity.MCP
             }
         }
 
-        public static bool IsLogEnabled(LogLevel level) => LogLevel.IsEnabled(level);
-
         public static LogLevel LogLevel
         {
             get => Instance.unityConnectionConfig.LogLevel;
             set
             {
                 Instance.unityConnectionConfig.LogLevel = value;
+                ApplyLogLevel(value);
                 NotifyChanged(Instance.unityConnectionConfig);
             }
         }
@@ -207,7 +206,10 @@ namespace com.IvanMurzak.Unity.MCP
 
             var subscription = _onConfigChanged.Subscribe(action);
             if (invokeImmediately)
-                Safe.Run(action, Instance.unityConnectionConfig, logLevel: Instance.unityConnectionConfig?.LogLevel ?? LogLevel.Trace);
+            {
+                try { action(Instance.unityConnectionConfig); }
+                catch (Exception e) { _logger.LogError(e, "{method}: exception invoking action immediately", nameof(SubscribeOnChanged)); }
+            }
             return subscription;
         }
 
@@ -329,36 +331,10 @@ namespace com.IvanMurzak.Unity.MCP
             }
         }
 
-        /// <summary>
-        /// Generate a deterministic TCP port based on current directory.
-        /// Uses SHA256 hash for better distribution and less collisions.
-        /// Port range: 50000-59999 (less commonly used dynamic ports).
-        /// </summary>
-        public static int GeneratePortFromDirectory()
+        static void NotifyChanged(UnityConnectionConfig data)
         {
-            const int MinPort = 50000; // Higher range to avoid common dynamic ports
-            const int MaxPort = 59999;
-            const int PortRange = MaxPort - MinPort + 1;
-
-            var currentDir = System.Environment.CurrentDirectory.ToLowerInvariant();
-
-            using (var sha256 = System.Security.Cryptography.SHA256.Create())
-            {
-                var hashBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(currentDir));
-
-                // Use first 4 bytes to create an integer
-                var hash = System.BitConverter.ToInt32(hashBytes, 0);
-
-                // Map to port range
-                var port = MinPort + (System.Math.Abs(hash) % PortRange);
-
-                return port;
-            }
+            try { _onConfigChanged.OnNext(data); }
+            catch (Exception e) { _logger.LogError(e, "{method}: exception", nameof(NotifyChanged)); }
         }
-
-        static void NotifyChanged(UnityConnectionConfig data) => Safe.Run(
-            action: (x) => _onConfigChanged.OnNext(x),
-            value: data,
-            logLevel: data?.LogLevel ?? LogLevel.Trace);
     }
 }

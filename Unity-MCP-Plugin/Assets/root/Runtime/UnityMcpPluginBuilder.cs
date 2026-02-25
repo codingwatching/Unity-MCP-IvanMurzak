@@ -18,23 +18,23 @@ namespace com.IvanMurzak.Unity.MCP
     using MicrosoftLogLevel = Microsoft.Extensions.Logging.LogLevel;
 
     /// <summary>
-    /// Builder for configuring <see cref="UnityMcpPlugin"/> from C# code.
+    /// Builder for configuring a runtime <see cref="UnityMcpPluginRuntime"/> from C# code.
     /// Intended for game builds where no JSON config file is available.
-    /// Obtain an instance via <see cref="UnityMcpPlugin.Initialize()"/>.
+    /// Obtain an instance via <see cref="UnityMcpPluginRuntime.Initialize()"/>.
     /// <example>
     /// <code>
     /// [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     /// static void SetupMcp()
     /// {
-    ///     var init = UnityMcpPlugin.Initialize();
-    ///     init.McpPlugin
-    ///         .WithConfig(c =>
+    ///     UnityMcpPluginRuntime.Initialize(builder =>
+    ///     {
+    ///         builder.WithConfig(c =>
     ///         {
     ///             c.Host  = "http://localhost:8080";
     ///             c.Token = "my-token";
-    ///         })
-    ///         .IgnoreAssemblies("MyGame.Tests");
-    ///     init.Build();
+    ///         });
+    ///     })
+    ///     .Build();
     /// }
     /// </code>
     /// </example>
@@ -49,13 +49,13 @@ namespace com.IvanMurzak.Unity.MCP
         /// </summary>
         public IMcpPluginBuilder McpPlugin { get; }
 
-        private readonly UnityMcpPlugin _plugin;
+        private readonly UnityMcpPluginRuntime _runtimePlugin;
         private readonly ILogger? _logger;
 
-        internal UnityMcpPluginBuilder(IMcpPluginBuilder mcpBuilder, UnityMcpPlugin plugin, ILoggerProvider? loggerProvider = null)
+        internal UnityMcpPluginBuilder(IMcpPluginBuilder mcpBuilder, UnityMcpPluginRuntime runtimePlugin, ILoggerProvider? loggerProvider = null)
         {
             McpPlugin = mcpBuilder;
-            _plugin = plugin;
+            _runtimePlugin = runtimePlugin;
             _logger = loggerProvider?.CreateLogger(nameof(UnityMcpPluginBuilder));
 
             // Apply Unity-specific defaults — the developer does not need to repeat these.
@@ -89,24 +89,20 @@ namespace com.IvanMurzak.Unity.MCP
         }
 
         /// <summary>
-        /// Finalizes the configuration, replaces the singleton's MCP plugin instance,
-        /// and initiates connection to the MCP server.
+        /// Builds and connects a runtime <see cref="IMcpPlugin"/> instance alongside the
+        /// Editor's existing connection. The Editor's connection is not affected.
+        /// Call <see cref="UnityMcpPluginRuntime.DisposeInstance()"/>
+        /// to shut it down, or exit Play mode (handled automatically).
         /// </summary>
         public void Build()
         {
             _logger?.LogTrace("{method} called.", nameof(Build));
 
-            _logger?.LogTrace("{method}: Disposing existing MCP Plugin instance...", nameof(Build));
-            _plugin.DisposeMcpPluginInstance();
+            _logger?.LogTrace("{method}: Building runtime MCP Plugin from builder...", nameof(Build));
+            var built = _runtimePlugin.BuildFromBuilder(McpPlugin);
 
-            _logger?.LogTrace("{method}: Building MCP Plugin from builder...", nameof(Build));
-            _plugin.BuildFromMcpPluginBuilder(McpPlugin);
-
-            _logger?.LogTrace("{method}: Connecting to MCP server...", nameof(Build));
-            _ = UnityMcpPlugin.Connect();
-
-            _logger?.LogInformation("{method} completed. Connected to MCP server at {host}.",
-                nameof(Build), UnityMcpPlugin.Host);
+            _logger?.LogTrace("{method}: Connecting runtime MCP Plugin to server...", nameof(Build));
+            _ = built.Connect();
 
             _logger?.LogTrace("{method} completed.", nameof(Build));
         }

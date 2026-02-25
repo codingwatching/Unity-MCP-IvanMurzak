@@ -12,13 +12,12 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
 namespace com.IvanMurzak.Unity.MCP
 {
-    public partial class UnityMcpPlugin
+    public partial class UnityMcpPluginEditor
     {
         public static string ResourcesFileName => "AI-Game-Developer-Config";
         public static string AssetsFilePath => $"UserSettings/{ResourcesFileName}.json";
@@ -32,19 +31,15 @@ namespace com.IvanMurzak.Unity.MCP
             wasCreated = false;
             try
             {
-#if UNITY_EDITOR
                 // Both Edit mode and Play mode read from the same UserSettings JSON file
                 var json = File.Exists(AssetsFilePath) ? File.ReadAllText(AssetsFilePath) : null;
-#else
-                // Game build: no JSON file — use C# initialization via UnityMcpPlugin.Initialize()
-                var json = (string?)null;
-#endif
+
                 UnityConnectionConfig? config = null;
                 try
                 {
                     config = string.IsNullOrWhiteSpace(json)
                         ? null
-                        : JsonSerializer.Deserialize<UnityConnectionConfig>(json, new JsonSerializerOptions
+                        : JsonSerializer.Deserialize<UnityConnectionConfig>(json!, new JsonSerializerOptions
                         {
                             PropertyNameCaseInsensitive = true
                         });
@@ -56,13 +51,8 @@ namespace com.IvanMurzak.Unity.MCP
                 }
                 if (config == null)
                 {
-#if UNITY_EDITOR
                     _logger.LogWarning("{method}: <color=orange><b>Creating {file}</b> file at <i>{path}</i></color>",
                         nameof(GetOrCreateConfig), ResourcesFileName, AssetsFilePath);
-#else
-                    _logger.LogWarning("{method}: No config file found. Call UnityMcpPlugin.Initialize() to configure the plugin for game builds.",
-                        nameof(GetOrCreateConfig));
-#endif
                     config = new UnityConnectionConfig();
                     wasCreated = true;
                 }
@@ -78,16 +68,8 @@ namespace com.IvanMurzak.Unity.MCP
             {
                 _logger.LogCritical(e, "{method}: <color=red><b>{file}</b> file can't be loaded from <i>{path}</i></color>",
                     nameof(GetOrCreateConfig), ResourcesFileName, AssetsFilePath);
-                throw e;
+                throw;
             }
-        }
-
-        public static string GenerateToken()
-        {
-            var bytes = new byte[32];
-            using var rng = RandomNumberGenerator.Create();
-            rng.GetBytes(bytes);
-            return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
         }
 
         public void Save()
@@ -98,7 +80,7 @@ namespace com.IvanMurzak.Unity.MCP
             {
                 var directory = Path.GetDirectoryName(AssetsFilePath);
                 if (!Directory.Exists(directory))
-                    Directory.CreateDirectory(directory);
+                    Directory.CreateDirectory(directory!);
 
                 unityConnectionConfig ??= new UnityConnectionConfig();
 

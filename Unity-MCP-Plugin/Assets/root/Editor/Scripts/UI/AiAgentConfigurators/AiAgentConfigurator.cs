@@ -1,4 +1,4 @@
-/*
+﻿/*
 ┌──────────────────────────────────────────────────────────────────┐
 │  Author: Ivan Murzak (https://github.com/IvanMurzak)             │
 │  Repository: GitHub (https://github.com/IvanMurzak/Unity-MCP)    │
@@ -228,11 +228,11 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
             SetAgentDownloadUrl(DownloadUrl);
             SetTutorialUrl(TutorialUrl);
             SetConfigureStatusIndicator();
-            SetTransportMethod(UnityMcpPlugin.TransportMethod);
+            SetTransportMethod(UnityMcpPluginEditor.TransportMethod);
 
             BtnRemoveConfig?.RegisterCallback<ClickEvent>(evt =>
             {
-                var activeConfig = UnityMcpPlugin.TransportMethod == TransportMethod.stdio ? ConfigStdio : ConfigHttp;
+                var activeConfig = UnityMcpPluginEditor.TransportMethod == TransportMethod.stdio ? ConfigStdio : ConfigHttp;
                 activeConfig.Unconfigure();
                 _configElementStdio?.UpdateStatus();
                 _configElementHttp?.UpdateStatus();
@@ -245,7 +245,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
             if (BtnRemoveConfig == null)
                 return;
 
-            var activeConfig = UnityMcpPlugin.TransportMethod == TransportMethod.stdio ? ConfigStdio : ConfigHttp;
+            var activeConfig = UnityMcpPluginEditor.TransportMethod == TransportMethod.stdio ? ConfigStdio : ConfigHttp;
             BtnRemoveConfig.style.display = activeConfig.IsDetected() ? DisplayStyle.Flex : DisplayStyle.None;
         }
 
@@ -397,8 +397,8 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
         /// </summary>
         protected virtual void ApplyStdioAuthorizationConfig(AiAgentConfig config)
         {
-            var isRequired = UnityMcpPlugin.AuthOption == AuthOption.required;
-            config.ApplyStdioAuthorization(isRequired, UnityMcpPlugin.Token);
+            var isRequired = UnityMcpPluginEditor.AuthOption == AuthOption.required;
+            config.ApplyStdioAuthorization(isRequired, UnityMcpPluginEditor.Token);
         }
 
         /// <summary>
@@ -408,8 +408,8 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
         /// </summary>
         protected virtual void ApplyHttpAuthorizationConfig(AiAgentConfig config)
         {
-            var isRequired = UnityMcpPlugin.AuthOption == AuthOption.required;
-            config.ApplyHttpAuthorization(isRequired, UnityMcpPlugin.Token);
+            var isRequired = UnityMcpPluginEditor.AuthOption == AuthOption.required;
+            config.ApplyHttpAuthorization(isRequired, UnityMcpPluginEditor.Token);
         }
 
         protected void ThrowIfRootNotSet()

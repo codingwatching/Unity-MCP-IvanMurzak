@@ -1,4 +1,4 @@
-/*
+﻿/*
 ┌──────────────────────────────────────────────────────────────────┐
 │  Author: Ivan Murzak (https://github.com/IvanMurzak)             │
 │  Repository: GitHub (https://github.com/IvanMurzak/Unity-MCP)    │
@@ -130,7 +130,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         [Test]
         public void FindByInstanceId_DeepSerialization_ProducesMoreDataThanShallow()
         {
-            var reflector = UnityMcpPlugin.Instance.McpPluginInstance!.McpManager.Reflector;
+            var reflector = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector;
             var go = new GameObject(GO_ParentName);
             var ss = go.AddComponent<SolarSystem>();
             ss.planets = new SolarSystem.PlanetData[] {

@@ -1,4 +1,4 @@
-/*
+﻿/*
 ┌──────────────────────────────────────────────────────────────────┐
 │  Author: Ivan Murzak (https://github.com/IvanMurzak)             │
 │  Repository: GitHub (https://github.com/IvanMurzak/Unity-MCP)    │
@@ -31,7 +31,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         {
             Debug.Log($"[{GetType().GetTypeShortName()}] SetUp");
 
-            UnityMcpPlugin.InitSingletonIfNeeded();
+            UnityMcpPluginEditor.InitSingletonIfNeeded();
 
             _logger = UnityLoggerFactory.LoggerFactory.CreateLogger("Tests");
 
