@@ -86,12 +86,12 @@ namespace com.IvanMurzak.Unity.MCP
         }
 
         /// <summary>
-        /// Builds and connects a runtime <see cref="IMcpPlugin"/> instance alongside the
+        /// Builds and connects a runtime <see cref="UnityMcpPluginRuntime"/> instance alongside the
         /// Editor's existing connection. The Editor's connection is not affected.
         /// Call <see cref="UnityMcpPluginRuntime.DisposeInstance()"/>
         /// to shut it down, or exit Play mode (handled automatically).
         /// </summary>
-        public IMcpPlugin Build()
+        public UnityMcpPluginRuntime Build()
         {
             _logger?.LogTrace("{method} called.", nameof(Build));
 
@@ -99,7 +99,7 @@ namespace com.IvanMurzak.Unity.MCP
             var built = _runtimePlugin.BuildFromBuilder(McpPlugin);
 
             _logger?.LogTrace("{method} completed.", nameof(Build));
-            return built;
+            return _runtimePlugin;
         }
     }
 }

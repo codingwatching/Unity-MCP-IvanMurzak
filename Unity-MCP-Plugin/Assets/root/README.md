@@ -327,6 +327,7 @@ If automatic configuration doesn't work for you for any reason, use the JSON fro
   ```bash
   gemini mcp add ai-game-developer <command>
   ```
+
   > Replace `<command>` from the table above
 </details>
 
@@ -336,6 +337,7 @@ If automatic configuration doesn't work for you for any reason, use the JSON fro
   ```bash
   claude mcp add ai-game-developer <command>
   ```
+
   > Replace `<command>` from the table above
 </details>
 
@@ -486,7 +488,7 @@ var mcpPlugin = UnityMcpPluginRuntime.Initialize(builder =>
 
 await mcpPlugin.Connect(); // Start active connection with retry to Unity-MCP-Server
 
-mcpPlugin.Disconnect(); // Stop active connection and close existed connection
+await mcpPlugin.Disconnect(); // Stop active connection and close existed connection
 ```
 
 ## Sample: AI powered Chess game bot

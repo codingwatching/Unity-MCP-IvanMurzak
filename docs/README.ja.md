@@ -325,6 +325,7 @@ openupm add com.ivanmurzak.unity.mcp
   ```bash
   gemini mcp add ai-game-developer <command>
   ```
+
   > 上の表から`<command>`を置き換えてください
 </details>
 
@@ -334,6 +335,7 @@ openupm add com.ivanmurzak.unity.mcp
   ```bash
   claude mcp add ai-game-developer <command>
   ```
+
   > 上の表から`<command>`を置き換えてください
 </details>
 
@@ -484,7 +486,7 @@ var mcpPlugin = UnityMcpPluginRuntime.Initialize(builder =>
 
 await mcpPlugin.Connect(); // Unity-MCP-Serverへの再試行付きアクティブ接続を開始
 
-mcpPlugin.Disconnect(); // アクティブ接続を停止し、既存の接続を閉じる
+await mcpPlugin.Disconnect(); // アクティブ接続を停止し、既存の接続を閉じる
 ```
 
 ## サンプル：AI駆動のチェスゲームボット

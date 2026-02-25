@@ -249,17 +249,17 @@ namespace com.IvanMurzak.Unity.MCP
             const int MaxPort = 59999;
             const int PortRange = MaxPort - MinPort + 1;
 
-            var currentDir = System.Environment.CurrentDirectory.ToLowerInvariant();
+            var currentDir = Environment.CurrentDirectory.ToLowerInvariant();
 
             using (var sha256 = System.Security.Cryptography.SHA256.Create())
             {
                 var hashBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(currentDir));
 
-                // Use first 4 bytes to create an integer
-                var hash = System.BitConverter.ToInt32(hashBytes, 0);
+                // Use first 4 bytes as an unsigned integer to avoid Math.Abs(int.MinValue) overflow
+                var hash = (uint)BitConverter.ToInt32(hashBytes, 0);
 
                 // Map to port range
-                var port = MinPort + (System.Math.Abs(hash) % PortRange);
+                var port = MinPort + (int)(hash % PortRange);
 
                 return port;
             }

@@ -325,6 +325,7 @@ openupm add com.ivanmurzak.unity.mcp
   ```bash
   gemini mcp add ai-game-developer <command>
   ```
+
   > 从上表中替换`<command>`
 </details>
 
@@ -334,6 +335,7 @@ openupm add com.ivanmurzak.unity.mcp
   ```bash
   claude mcp add ai-game-developer <command>
   ```
+
   > 从上表中替换`<command>`
 </details>
 
@@ -484,7 +486,7 @@ var mcpPlugin = UnityMcpPluginRuntime.Initialize(builder =>
 
 await mcpPlugin.Connect(); // 启动与 Unity-MCP-Server 的主动连接（含重试）
 
-mcpPlugin.Disconnect(); // 停止主动连接并关闭现有连接
+await mcpPlugin.Disconnect(); // 停止主动连接并关闭现有连接
 ```
 
 ## 示例：AI驱动的国际象棋游戏机器人

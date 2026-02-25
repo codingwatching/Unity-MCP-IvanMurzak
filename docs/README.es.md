@@ -325,6 +325,7 @@ Si la configuración automática no funciona por alguna razón, usa el JSON de l
   ```bash
   gemini mcp add ai-game-developer <command>
   ```
+
   > Reemplaza `<command>` de la tabla anterior
 </details>
 
@@ -334,6 +335,7 @@ Si la configuración automática no funciona por alguna razón, usa el JSON de l
   ```bash
   claude mcp add ai-game-developer <command>
   ```
+
   > Reemplaza `<command>` de la tabla anterior
 </details>
 
@@ -484,7 +486,7 @@ var mcpPlugin = UnityMcpPluginRuntime.Initialize(builder =>
 
 await mcpPlugin.Connect(); // Iniciar conexión activa con reintento al Unity-MCP-Server
 
-mcpPlugin.Disconnect(); // Detener conexión activa y cerrar la conexión existente
+await mcpPlugin.Disconnect(); // Detener conexión activa y cerrar la conexión existente
 ```
 
 ## Ejemplo: Bot de ajedrez impulsado por IA
