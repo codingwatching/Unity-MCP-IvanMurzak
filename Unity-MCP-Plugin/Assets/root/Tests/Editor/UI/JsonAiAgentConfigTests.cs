@@ -1145,6 +1145,194 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
             yield return null;
         }
 
+        [UnityTest]
+        public IEnumerator IsDetected_DeprecatedName_ReturnsTrue()
+        {
+            // Arrange - file only contains the deprecated server name
+            var bodyPath = "mcpServers";
+            var existingJson = $@"{{
+                ""{bodyPath}"": {{
+                    ""Unity-MCP"": {{
+                        ""type"": ""stdio"",
+                        ""command"": ""/some/path""
+                    }}
+                }}
+            }}";
+            File.WriteAllText(tempConfigPath, existingJson);
+            var config = CreateStdioConfig(tempConfigPath, bodyPath);
+
+            // Act & Assert
+            Assert.IsTrue(config.IsDetected(), "IsDetected should return true when only the deprecated name is present");
+
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator IsDetected_DuplicateByCommand_ReturnsTrue()
+        {
+            // Arrange - file only contains a duplicate entry matching by command
+            var bodyPath = "mcpServers";
+            var executable = McpServerManager.ExecutableFullPath.Replace('\\', '/');
+            var existingJson = $@"{{
+                ""{bodyPath}"": {{
+                    ""my-custom-name"": {{
+                        ""type"": ""stdio"",
+                        ""command"": ""{executable}"",
+                        ""args"": [""--old-arg""]
+                    }}
+                }}
+            }}";
+            File.WriteAllText(tempConfigPath, existingJson);
+            var config = CreateStdioConfig(tempConfigPath, bodyPath);
+
+            // Act & Assert
+            Assert.IsTrue(config.IsDetected(), "IsDetected should return true when a duplicate entry with the same command is present");
+
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator IsDetected_DuplicateByUrl_ReturnsTrue()
+        {
+            // Arrange - file only contains a duplicate entry matching by url
+            var bodyPath = "mcpServers";
+            var url = UnityMcpPlugin.Host;
+            var existingJson = $@"{{
+                ""{bodyPath}"": {{
+                    ""my-custom-name"": {{
+                        ""type"": ""streamableHttp"",
+                        ""url"": ""{url}""
+                    }}
+                }}
+            }}";
+            File.WriteAllText(tempConfigPath, existingJson);
+            var config = CreateHttpConfig(tempConfigPath, bodyPath);
+
+            // Act & Assert
+            Assert.IsTrue(config.IsDetected(), "IsDetected should return true when a duplicate entry with the same url is present");
+
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator Unconfigure_DeprecatedName_RemovesIt()
+        {
+            // Arrange - file only contains the deprecated server name
+            var bodyPath = "mcpServers";
+            var existingJson = $@"{{
+                ""{bodyPath}"": {{
+                    ""Unity-MCP"": {{
+                        ""type"": ""stdio"",
+                        ""command"": ""/some/path""
+                    }}
+                }}
+            }}";
+            File.WriteAllText(tempConfigPath, existingJson);
+            var config = CreateStdioConfig(tempConfigPath, bodyPath);
+
+            // Act
+            var result = config.Unconfigure();
+
+            // Assert
+            Assert.IsTrue(result, "Unconfigure should return true when deprecated entry was removed");
+            var json = File.ReadAllText(tempConfigPath);
+            var rootObj = JsonNode.Parse(json)?.AsObject();
+            var mcpServers = rootObj!["mcpServers"]?.AsObject();
+            Assert.IsNull(mcpServers!["Unity-MCP"], "Deprecated entry should be removed");
+
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator Unconfigure_DuplicateByCommand_RemovesIt()
+        {
+            // Arrange - file only contains a duplicate entry with the same command
+            var bodyPath = "mcpServers";
+            var executable = McpServerManager.ExecutableFullPath.Replace('\\', '/');
+            var existingJson = $@"{{
+                ""{bodyPath}"": {{
+                    ""my-custom-name"": {{
+                        ""type"": ""stdio"",
+                        ""command"": ""{executable}"",
+                        ""args"": [""--old-arg""]
+                    }}
+                }}
+            }}";
+            File.WriteAllText(tempConfigPath, existingJson);
+            var config = CreateStdioConfig(tempConfigPath, bodyPath);
+
+            // Act
+            var result = config.Unconfigure();
+
+            // Assert
+            Assert.IsTrue(result, "Unconfigure should return true when a duplicate entry was removed");
+            var json = File.ReadAllText(tempConfigPath);
+            var rootObj = JsonNode.Parse(json)?.AsObject();
+            var mcpServers = rootObj!["mcpServers"]?.AsObject();
+            Assert.IsNull(mcpServers!["my-custom-name"], "Duplicate entry should be removed");
+
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator Unconfigure_DeprecatedAndCurrentPresent_RemovesBoth()
+        {
+            // Arrange - file contains both current and deprecated names
+            var bodyPath = "mcpServers";
+            var existingJson = $@"{{
+                ""{bodyPath}"": {{
+                    ""Unity-MCP"": {{
+                        ""type"": ""stdio"",
+                        ""command"": ""/old/path""
+                    }},
+                    ""{AiAgentConfig.DefaultMcpServerName}"": {{
+                        ""type"": ""stdio"",
+                        ""command"": ""/some/path""
+                    }}
+                }}
+            }}";
+            File.WriteAllText(tempConfigPath, existingJson);
+            var config = CreateStdioConfig(tempConfigPath, bodyPath);
+
+            // Act
+            var result = config.Unconfigure();
+
+            // Assert
+            Assert.IsTrue(result, "Unconfigure should return true when entries were removed");
+            var json = File.ReadAllText(tempConfigPath);
+            var rootObj = JsonNode.Parse(json)?.AsObject();
+            var mcpServers = rootObj!["mcpServers"]?.AsObject();
+            Assert.IsNull(mcpServers!["Unity-MCP"], "Deprecated entry should be removed");
+            Assert.IsNull(mcpServers[AiAgentConfig.DefaultMcpServerName], "Current entry should be removed");
+
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator Unconfigure_NothingPresent_ReturnsFalse()
+        {
+            // Arrange - file has no known entries
+            var bodyPath = "mcpServers";
+            var existingJson = $@"{{
+                ""{bodyPath}"": {{
+                    ""other-server"": {{
+                        ""type"": ""stdio"",
+                        ""command"": ""completely-different-command""
+                    }}
+                }}
+            }}";
+            File.WriteAllText(tempConfigPath, existingJson);
+            var config = CreateStdioConfig(tempConfigPath, bodyPath);
+
+            // Act
+            var result = config.Unconfigure();
+
+            // Assert
+            Assert.IsFalse(result, "Unconfigure should return false when nothing was present to remove");
+
+            yield return null;
+        }
+
         #endregion
 
         #region ValueComparisonMode - Path and URL Normalization

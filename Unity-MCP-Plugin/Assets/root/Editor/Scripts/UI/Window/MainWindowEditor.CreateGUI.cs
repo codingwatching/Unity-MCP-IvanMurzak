@@ -10,6 +10,7 @@
 
 #nullable enable
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using com.IvanMurzak.McpPlugin.Common.Model;
 using com.IvanMurzak.McpPlugin.Common.Utils;
@@ -20,6 +21,7 @@ using Microsoft.Extensions.Logging;
 using R3;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static com.IvanMurzak.McpPlugin.Common.Consts.MCP.Server;
 using LogLevel = com.IvanMurzak.Unity.MCP.Runtime.Utils.LogLevel;
 using TransportMethod = com.IvanMurzak.McpPlugin.Common.Consts.MCP.Server.TransportMethod;
 
@@ -55,7 +57,101 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
         private const string URL_GitHubIssues = "https://github.com/IvanMurzak/Unity-MCP/issues";
         private const string URL_Discord = "https://discord.gg/cfbdMZX99G";
 
-        private Label? _labelAiAgentStatus;
+        // ── Shared tooltip building blocks ──────────────────────────────────────────
+        //
+        // These blocks are embedded verbatim inside the per-element tooltips below so
+        // that each tooltip is self-contained yet the authoritative text lives in one place.
+
+        private const string Tooltip_TransportMethods =
+            "• stdio  —  The AI agent launches the MCP server as its own child process and " +
+            "exchanges messages over stdin/stdout. Only one agent at a time; not recommended " +
+            "unless the AI client has no HTTP support.\n\n" +
+            "• http  —  The AI agent connects over HTTP to a running MCP server. Supports " +
+            "multiple simultaneous agents and remote deployments. Recommended.";
+
+        private const string Tooltip_AuthorizationTokenConcept =
+            "The authorization token is a shared secret key. When required, every AI agent " +
+            "must include this token in its MCP server configuration. The server rejects any " +
+            "connection that does not supply the correct token.\n\n" +
+            "Treat this token like a password — do not share it publicly or commit it to version control.";
+
+        // ── Per-element tooltips ─────────────────────────────────────────────────────
+
+        private const string Tooltip_LabelTransport =
+            "Transport method defines the communication channel between the AI agent and the " +
+            "MCP server. It determines how the agent discovers, launches, and sends messages " +
+            "to the server.\n\n" +
+            "Available methods:\n" +
+            Tooltip_TransportMethods;
+
+        private const string Tooltip_ToggleStdio =
+            "Use STDIO transport.\n\n" +
+            "The AI agent launches the MCP server as its own subprocess and exchanges messages " +
+            "via standard input/output (stdin/stdout) streams.\n\n" +
+            "Limitations:\n" +
+            "  • Only one AI agent instance can connect at a time.\n" +
+            "  • The local MCP server Start / Stop controls are disabled — the AI agent manages " +
+            "the server lifecycle itself.\n" +
+            "  • Some features requiring a persistent long-running server may not function.\n\n" +
+            "Prefer HTTP unless your AI client has no HTTP support.\n\n" +
+            "Transport method overview:\n" +
+            Tooltip_TransportMethods;
+
+        private const string Tooltip_ToggleHttp =
+            "Use HTTP transport (recommended).\n\n" +
+            "The AI agent connects over HTTP to the MCP server already running on this machine " +
+            "(or a remote host if configured).\n\n" +
+            "Advantages:\n" +
+            "  • Multiple AI agents can connect to the same server simultaneously.\n" +
+            "  • Supports remote deployments — the server can run on a different machine.\n" +
+            "  • Full lifecycle control via the Start / Stop button.\n\n" +
+            "Ensure the local MCP server is running before the AI agent attempts to connect.\n\n" +
+            "Transport method overview:\n" +
+            Tooltip_TransportMethods;
+
+        private const string Tooltip_LabelAuthorizationToken =
+            "Controls whether the MCP server requires a secret token to accept connections " +
+            "from AI agents.\n\n" +
+            Tooltip_AuthorizationTokenConcept;
+
+        private const string Tooltip_ToggleAuthNone =
+            "Local deployment — no authorization token required.\n\n" +
+            "The MCP server accepts any connection without checking a token. This is safe when " +
+            "both Unity and the AI agent run on the same machine and the server port is not " +
+            "reachable from the network.\n\n" +
+            "Use this when:\n" +
+            "  • Unity, the MCP server, and the AI agent are all on the same computer.\n" +
+            "  • No other machines need to reach the server.\n\n" +
+            "⚠ Do not use this if the server port is exposed to other machines or the internet.\n\n" +
+            "About authorization tokens:\n" +
+            Tooltip_AuthorizationTokenConcept;
+
+        private const string Tooltip_ToggleAuthRequired =
+            "Remote deployment — authorization token required.\n\n" +
+            "Every AI agent must supply the correct token in its MCP server configuration. " +
+            "The server will reject any connection that does not include a valid token.\n\n" +
+            "Use this when:\n" +
+            "  • The MCP server runs on a different machine from the AI agent.\n" +
+            "  • The server endpoint is reachable over a network.\n\n" +
+            "After enabling, generate a secure token with the 'New' button, then copy it into " +
+            "your AI agent's MCP server configuration.\n\n" +
+            "About authorization tokens:\n" +
+            Tooltip_AuthorizationTokenConcept;
+
+        private const string Tooltip_BtnGenerateToken =
+            "Generate a new cryptographically secure random token.\n\n" +
+            "Uses a cryptographic RNG to produce 32 bytes (256 bits) of randomness encoded as " +
+            "URL-safe Base64 — suitable for production-level authentication.\n\n" +
+            "Steps after generating:\n" +
+            "  1. The new token is saved automatically to your project configuration.\n" +
+            "  2. The MCP server is restarted to apply the new token.\n" +
+            "  3. Copy the token from the input field next to this button.\n" +
+            "  4. Open your AI agent's MCP server configuration and paste the token into the " +
+            "authorization field.\n\n" +
+            "⚠ Generating a new token immediately invalidates the previous one. Every AI agent " +
+            "must be updated with the new token before it can connect again.";
+
+        private VisualElement? _aiAgentLabelsContainer;
         private VisualElement? _aiAgentStatusCircle;
 
         private DateTime _setMcpServerDataTime;
@@ -108,7 +204,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
             _ => ServerButtonText_Connect
         };
 
-        private void SetAiAgentStatus(bool isConnected, string? label = null)
+        private void SetAiAgentStatus(bool isConnected, IEnumerable<string>? labels = null)
         {
             _setAiAgentDataTime = DateTime.UtcNow;
 
@@ -117,14 +213,31 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                 Logger.LogError("{field} is not initialized, cannot update AI agent status", nameof(_aiAgentStatusCircle));
                 return;
             }
-            if (_labelAiAgentStatus == null)
+            if (_aiAgentLabelsContainer == null)
             {
-                Logger.LogError("{field} is not initialized, cannot update AI agent status", nameof(_labelAiAgentStatus));
+                Logger.LogError("{field} is not initialized, cannot update AI agent status", nameof(_aiAgentLabelsContainer));
                 return;
             }
 
             SetStatusIndicator(_aiAgentStatusCircle, isConnected ? USS_Connected : USS_Disconnected);
-            _labelAiAgentStatus.text = label ?? "AI agent";
+
+            _aiAgentLabelsContainer.Clear();
+            var labelList = labels?.ToList();
+            if (labelList == null || labelList.Count == 0)
+            {
+                var lbl = new Label("AI agent");
+                lbl.AddToClassList("timeline-label");
+                _aiAgentLabelsContainer.Add(lbl);
+            }
+            else
+            {
+                foreach (var text in labelList)
+                {
+                    var lbl = new Label(text);
+                    lbl.AddToClassList("timeline-label");
+                    _aiAgentLabelsContainer.Add(lbl);
+                }
+            }
         }
 
         #endregion
@@ -177,7 +290,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
             var statusCircle = root.Q<VisualElement>("connectionStatusCircle");
             var statusText = root.Q<Label>("connectionStatusText");
 
-            _labelAiAgentStatus = root.Q<Label>("aiAgentLabel");
+            _aiAgentLabelsContainer = root.Q<VisualElement>("aiAgentLabelsContainer");
             _aiAgentStatusCircle = root.Q<VisualElement>("aiAgentStatusCircle");
 
             inputFieldHost.value = UnityMcpPlugin.Host;
@@ -272,6 +385,114 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                 .AddTo(_disposables);
 
             btnStartStop.RegisterCallback<ClickEvent>(evt => HandleServerButton(btnStartStop, statusLabel));
+
+            // MCP server authorization configuration UI elements
+            var labelAuthorizationToken = root.Query<Label>("labelAuthorizationToken").First();
+            var toggleAuthorizationNone = root.Query<Toggle>("toggleAuthorizationNone").First();
+            var toggleAuthorizationRequired = root.Query<Toggle>("toggleAuthorizationRequired").First();
+            var inputAuthorizationToken = root.Query<TextField>("inputAuthorizationToken").First();
+            var tokenSection = root.Query<VisualElement>("tokenSection").First();
+            var btnGenerateToken = root.Query<Button>("btnGenerateToken").First();
+
+            if (toggleAuthorizationNone == null)
+            {
+                Debug.LogError("toggleAuthorizationNone not found in UXML.");
+                return;
+            }
+            if (toggleAuthorizationRequired == null)
+            {
+                Debug.LogError("toggleAuthorizationRequired not found in UXML.");
+                return;
+            }
+            if (inputAuthorizationToken == null)
+            {
+                Debug.LogError("inputAuthorizationToken not found in UXML.");
+                return;
+            }
+            if (tokenSection == null)
+            {
+                Debug.LogError("tokenSection not found in UXML.");
+                return;
+            }
+            if (btnGenerateToken == null)
+            {
+                Debug.LogError("btnGenerateToken not found in UXML.");
+                return;
+            }
+
+            if (labelAuthorizationToken != null) labelAuthorizationToken.tooltip = Tooltip_LabelAuthorizationToken;
+            toggleAuthorizationNone.tooltip = Tooltip_ToggleAuthNone;
+            toggleAuthorizationRequired.tooltip = Tooltip_ToggleAuthRequired;
+            btnGenerateToken.tooltip = Tooltip_BtnGenerateToken;
+
+            var authOption = UnityMcpPlugin.AuthOption;
+            toggleAuthorizationNone.SetValueWithoutNotify(authOption == AuthOption.none);
+            toggleAuthorizationRequired.SetValueWithoutNotify(authOption == AuthOption.required);
+            inputAuthorizationToken.SetValueWithoutNotify(UnityMcpPlugin.Token ?? string.Empty);
+            SetTokenFieldsVisible(inputAuthorizationToken, tokenSection, authOption == AuthOption.required);
+
+
+
+            toggleAuthorizationNone.RegisterValueChangedCallback(evt =>
+            {
+                if (evt.newValue)
+                {
+                    var wasRunning = McpServerManager.IsRunning && UnityMcpPlugin.TransportMethod != TransportMethod.stdio;
+                    UnityMcpPlugin.AuthOption = AuthOption.none;
+                    UnityMcpPlugin.Instance.Save();
+                    toggleAuthorizationRequired.SetValueWithoutNotify(false);
+                    SetTokenFieldsVisible(inputAuthorizationToken, tokenSection, false);
+                    InvalidateAndReloadAgentUI();
+                    RestartServerIfWasRunning(wasRunning);
+                }
+                else if (!toggleAuthorizationRequired.value)
+                {
+                    toggleAuthorizationNone.SetValueWithoutNotify(true);
+                }
+            });
+
+            toggleAuthorizationRequired.RegisterValueChangedCallback(evt =>
+            {
+                if (evt.newValue)
+                {
+                    var wasRunning = McpServerManager.IsRunning && UnityMcpPlugin.TransportMethod != TransportMethod.stdio;
+                    UnityMcpPlugin.AuthOption = AuthOption.required;
+                    UnityMcpPlugin.Instance.Save();
+                    toggleAuthorizationNone.SetValueWithoutNotify(false);
+                    SetTokenFieldsVisible(inputAuthorizationToken, tokenSection, true);
+                    InvalidateAndReloadAgentUI();
+                    RestartServerIfWasRunning(wasRunning);
+                }
+                else if (!toggleAuthorizationNone.value)
+                {
+                    toggleAuthorizationRequired.SetValueWithoutNotify(true);
+                }
+            });
+
+            inputAuthorizationToken.RegisterCallback<FocusOutEvent>(_ =>
+            {
+                var newToken = inputAuthorizationToken.value;
+                if (newToken == UnityMcpPlugin.Token)
+                    return;
+
+                var wasRunning = McpServerManager.IsRunning && UnityMcpPlugin.TransportMethod != TransportMethod.stdio;
+                UnityMcpPlugin.Token = newToken;
+                UnityMcpPlugin.Instance.Save();
+                InvalidateAndReloadAgentUI();
+                RestartServerIfWasRunning(wasRunning);
+            });
+
+            btnGenerateToken.RegisterCallback<ClickEvent>(_ =>
+            {
+                var newToken = UnityMcpPlugin.GenerateToken();
+                inputAuthorizationToken.SetValueWithoutNotify(newToken);
+
+                var wasRunning = McpServerManager.IsRunning && UnityMcpPlugin.TransportMethod != TransportMethod.stdio;
+                UnityMcpPlugin.Token = newToken;
+                UnityMcpPlugin.Instance.Save();
+                InvalidateAndReloadAgentUI();
+                RestartServerIfWasRunning(wasRunning);
+            });
         }
 
         private McpServerStatus CombineMcpServerStatus(McpServerStatus status, bool isConnected)
@@ -373,15 +594,15 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                 return;
             }
 
-            var remoteMcpManagerHub = mcpPluginInstance.RemoteMcpManagerHub;
-            if (remoteMcpManagerHub == null)
+            var mcpManagerHub = mcpPluginInstance.McpManagerHub;
+            if (mcpManagerHub == null)
             {
-                Logger.LogDebug("Cannot fetch MCP server data: RemoteMcpManagerHub is null");
+                Logger.LogDebug("Cannot fetch MCP server data: McpManagerHub is null");
                 return;
             }
 
             var fetchTime = DateTime.UtcNow;
-            var task = remoteMcpManagerHub.GetMcpServerData();
+            var task = mcpManagerHub.GetMcpServerData();
             if (task == null)
             {
                 Logger.LogDebug("Cannot fetch MCP server data: GetMcpServerData returned null");
@@ -420,23 +641,39 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
             McpPlugin.McpPlugin.DoAlways(plugin =>
             {
                 plugin.McpManager.OnClientConnected
-                    .ObserveOnCurrentSynchronizationContext()
                     .Subscribe(data =>
                     {
-                        Logger.LogInformation("On AI agent connected: {clientName} ({clientVersion})", data.ClientName, data.ClientVersion);
+                        Logger.LogInformation("On AI agent connected: {clientName} ({clientVersion})",
+                            data.ClientName, data.ClientVersion);
+
                         if (Logger.IsEnabled(Microsoft.Extensions.Logging.LogLevel.Trace))
                             Logger.LogTrace("AI Agent Data: {data}", data.ToPrettyJson());
-
-                        SetAiAgentStatus(data.IsConnected, $"AI agent: {data.ClientName} ({data.ClientVersion})");
                     })
                     .AddTo(_disposables);
 
                 plugin.McpManager.OnClientDisconnected
-                    .ObserveOnCurrentSynchronizationContext()
-                    .Subscribe(_ =>
+                    .Subscribe(mcpClientData =>
                     {
-                        Logger.LogInformation("On AI agent disconnected");
-                        SetAiAgentStatus(false);
+                        Logger.LogInformation("On AI agent disconnected: {clientName} ({clientVersion})",
+                            mcpClientData.ClientName, mcpClientData.ClientVersion);
+                    })
+                    .AddTo(_disposables);
+
+                plugin.McpManager.OnClientsChanged
+                    .ObserveOnCurrentSynchronizationContext()
+                    .Subscribe(mcpClients =>
+                    {
+                        Logger.LogDebug("On AI agents changed: {count} clients", mcpClients.Count);
+
+                        var connectedAgents = mcpClients.Where(c => c.IsConnected).ToList();
+                        if (connectedAgents.Count == 0)
+                        {
+                            Logger.LogDebug("No connected AI agents found in clients list.");
+                            SetAiAgentStatus(false);
+                            return;
+                        }
+
+                        SetAiAgentStatus(true, connectedAgents.Select(a => $"AI agent: {a.ClientName} ({a.ClientVersion})"));
                     })
                     .AddTo(_disposables);
 
@@ -449,11 +686,16 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                 .Subscribe(_ => FetchAiAgentData())
                 .AddTo(_disposables);
 
-            var containerMcpServer = root.Q<VisualElement>("TimelinePointMcpServer") ?? throw new InvalidOperationException("TimelinePointMcpServer element not found.");
+            var containerMcpServer = root.Q<VisualElement>("mcpServerStatusControl") ?? throw new InvalidOperationException("mcpServerStatusControl element not found.");
             var btnStartStopMcpServer = root.Q<Button>("btnStartStopServer") ?? throw new InvalidOperationException("MCP Server start/stop button not found.");
 
             var toggleOptionHttp = root.Q<Toggle>("toggleOptionHttp") ?? throw new NullReferenceException("Toggle 'toggleOptionHttp' not found in UI.");
             var toggleOptionStdio = root.Q<Toggle>("toggleOptionStdio") ?? throw new NullReferenceException("Toggle 'toggleOptionStdio' not found in UI.");
+
+            var labelTransport = root.Q<Label>("labelTransport");
+            if (labelTransport != null) labelTransport.tooltip = Tooltip_LabelTransport;
+            toggleOptionStdio.tooltip = Tooltip_ToggleStdio;
+            toggleOptionHttp.tooltip = Tooltip_ToggleHttp;
 
             // Initialize with HTTP selected by default
             toggleOptionStdio.value = UnityMcpPlugin.TransportMethod == TransportMethod.stdio;
@@ -521,15 +763,15 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                 return;
             }
 
-            var remoteMcpManagerHub = mcpPluginInstance.RemoteMcpManagerHub;
-            if (remoteMcpManagerHub == null)
+            var mcpManagerHub = mcpPluginInstance.McpManagerHub;
+            if (mcpManagerHub == null)
             {
-                Logger.LogDebug("Cannot fetch AI agent data: RemoteMcpManagerHub is null");
+                Logger.LogDebug("Cannot fetch AI agent data: McpManagerHub is null");
                 return;
             }
 
             var fetchTime = DateTime.UtcNow;
-            var task = remoteMcpManagerHub.GetMcpClientData();
+            var task = mcpManagerHub.GetMcpClientData();
             if (task == null)
             {
                 Logger.LogDebug("Cannot fetch AI agent data: GetMcpClientData returned null");
@@ -548,14 +790,16 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                 {
                     if (t.IsCompletedSuccessfully)
                     {
-                        var data = t.Result;
-                        SetAiAgentStatus(data.IsConnected, data.IsConnected
-                            ? $"AI agent: {data.ClientName} ({data.ClientVersion})"
-                            : "AI agent");
+                        var clients = t.Result;
+                        var connectedAgents = clients.Where(c => c.IsConnected).ToList();
+                        var isConnected = connectedAgents.Count > 0;
+                        SetAiAgentStatus(isConnected, isConnected
+                            ? connectedAgents.Select(a => $"AI agent: {a.ClientName} ({a.ClientVersion})")
+                            : null);
 
                         // If AI agent is not connected but Unity is, retry after delay.
                         // The AI agent may need time to re-establish its session after Unity reconnects.
-                        if (!data.IsConnected && retryCount > 0 && UnityMcpPlugin.IsConnected.CurrentValue)
+                        if (!isConnected && retryCount > 0 && UnityMcpPlugin.IsConnected.CurrentValue)
                         {
                             Logger.LogDebug("AI agent not connected yet, scheduling retry ({retriesLeft} left)", retryCount);
                             Observable.Timer(TimeSpan.FromMilliseconds(retryDelayMs))
@@ -571,7 +815,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                     }
                     else
                     {
-                        SetAiAgentStatus(false, "AI agent: Not found");
+                        SetAiAgentStatus(false, new[] { "AI agent: Not found" });
                     }
                 });
             });

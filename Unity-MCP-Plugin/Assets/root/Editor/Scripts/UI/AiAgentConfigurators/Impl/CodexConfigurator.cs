@@ -9,8 +9,10 @@
 */
 
 #nullable enable
+using System.Collections.Generic;
 using System.IO;
 using com.IvanMurzak.Unity.MCP.Editor.Utils;
+using UnityEngine;
 using UnityEngine.UIElements;
 using static com.IvanMurzak.McpPlugin.Common.Consts.MCP.Server;
 
@@ -21,6 +23,8 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
     /// </summary>
     public class CodexConfigurator : AiAgentConfigurator
     {
+        const string EnvVarNameAuthToken = "GAME_DEV_AUTH_TOKEN";
+
         public override string AgentName => "Codex";
         public override string AgentId => "codex";
         public override string DownloadUrl => "https://openai.com/codex/";
@@ -40,11 +44,13 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
         .SetProperty("args", new[] {
             $"{Args.Port}={UnityMcpPlugin.Port}",
             $"{Args.PluginTimeout}={UnityMcpPlugin.TimeoutMs}",
-            $"{Args.ClientTransportMethod}={TransportMethod.stdio}"
+            $"{Args.ClientTransportMethod}={TransportMethod.stdio}",
+            $"{Args.Authorization}={UnityMcpPlugin.AuthOption}"
         }, requiredForConfiguration: true)
         .SetProperty("tool_timeout_sec", 300, requiredForConfiguration: false) // Optional: Set a longer tool timeout for Codex
         .SetPropertyToRemove("url")
-        .SetPropertyToRemove("type");
+        .SetPropertyToRemove("type")
+        .SetPropertyToRemove("startup_timeout_sec");
 
 
         protected override AiAgentConfig CreateConfigStdioMacLinux() => new TomlAiAgentConfig(
@@ -60,11 +66,13 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
         .SetProperty("args", new[] {
             $"{Args.Port}={UnityMcpPlugin.Port}",
             $"{Args.PluginTimeout}={UnityMcpPlugin.TimeoutMs}",
-            $"{Args.ClientTransportMethod}={TransportMethod.stdio}"
+            $"{Args.ClientTransportMethod}={TransportMethod.stdio}",
+            $"{Args.Authorization}={UnityMcpPlugin.AuthOption}"
         }, requiredForConfiguration: true)
         .SetProperty("tool_timeout_sec", 300, requiredForConfiguration: false) // Optional: Set a longer tool timeout for Codex
         .SetPropertyToRemove("url")
-        .SetPropertyToRemove("type");
+        .SetPropertyToRemove("type")
+        .SetPropertyToRemove("startup_timeout_sec");
 
 
         protected override AiAgentConfig CreateConfigHttpWindows() => new TomlAiAgentConfig(
@@ -78,6 +86,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
         .SetProperty("enabled", true, requiredForConfiguration: true) // Codex requires an "enabled" property
         .SetProperty("url", UnityMcpPlugin.Host, requiredForConfiguration: true, comparison: ValueComparisonMode.Url)
         .SetProperty("tool_timeout_sec", 300, requiredForConfiguration: false) // Optional: Set a longer tool timeout for Codex
+        .SetProperty("startup_timeout_sec", 30, requiredForConfiguration: false) // Optional: Set a startup timeout for HTTP connection attempts
         .SetPropertyToRemove("command")
         .SetPropertyToRemove("args")
         .SetPropertyToRemove("type");
@@ -93,9 +102,33 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
         .SetProperty("enabled", true, requiredForConfiguration: true) // Codex requires an "enabled" property
         .SetProperty("url", UnityMcpPlugin.Host, requiredForConfiguration: true, comparison: ValueComparisonMode.Url)
         .SetProperty("tool_timeout_sec", 300, requiredForConfiguration: false) // Optional: Set a longer tool timeout for Codex
+        .SetProperty("startup_timeout_sec", 30, requiredForConfiguration: false) // Optional: Set a startup timeout for HTTP connection attempts
         .SetPropertyToRemove("command")
         .SetPropertyToRemove("args")
         .SetPropertyToRemove("type");
+
+        protected override void ApplyHttpAuthorizationConfig(AiAgentConfig config)
+        {
+            base.ApplyHttpAuthorizationConfig(config);
+
+            var tomlConfig = config as TomlAiAgentConfig ?? throw new System.InvalidCastException($"Expected TomlAiAgentConfig for Codex HTTP configuration but got {config.GetType().Name}");
+            var isRequired = UnityMcpPlugin.AuthOption == AuthOption.required;
+            var token = UnityMcpPlugin.Token;
+
+            const string envVarNameBearerToken = "bearer_token_env_var";
+
+            if (isRequired && !string.IsNullOrEmpty(token))
+            {
+                tomlConfig.SetProperty(
+                    key: envVarNameBearerToken,
+                    value: EnvVarNameAuthToken,
+                    requiredForConfiguration: true);
+            }
+            else
+            {
+                tomlConfig.SetPropertyToRemove(envVarNameBearerToken);
+            }
+        }
 
         protected override void OnUICreated(VisualElement root)
         {
@@ -132,6 +165,19 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
             ContainerStdio!.Add(troubleshootingContainerStdio);
 
             // HTTP Configuration
+
+            if (UnityMcpPlugin.AuthOption == AuthOption.required)
+            {
+                // ContainerHttp!.Add(TemplateAlertLabel($"Authorization is not fully functional in Codex. Consider to disable Authorization or use another AI agent."));
+
+                ContainerHttp!.Add(TemplateWarningLabel($"Authorization is enabled. Set the '{EnvVarNameAuthToken}' environment variable before starting Codex in terminal."));
+#if UNITY_EDITOR_WIN
+                ContainerHttp!.Add(TemplateTextFieldReadOnly($"setx {EnvVarNameAuthToken} \"{UnityMcpPlugin.Token}\""));
+                ContainerHttp!.Add(TemplateWarningLabel($"Terminal restart required."));
+#else
+                ContainerHttp!.Add(TemplateTextFieldReadOnly($"export {EnvVarNameAuthToken}=\"{UnityMcpPlugin.Token}\""));
+#endif
+            }
 
             var manualStepsOption1Http = TemplateFoldoutFirst("Manual Configuration Steps - Option 1");
 

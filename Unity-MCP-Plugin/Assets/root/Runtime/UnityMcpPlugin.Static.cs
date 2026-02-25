@@ -141,6 +141,25 @@ namespace com.IvanMurzak.Unity.MCP
             }
         }
 
+        public static string? Token
+        {
+            get => Instance.unityConnectionConfig.Token;
+            set
+            {
+                Instance.unityConnectionConfig.Token = value;
+                NotifyChanged(Instance.unityConnectionConfig);
+            }
+        }
+        public static AuthOption AuthOption
+        {
+            get => Instance.unityConnectionConfig.AuthOption;
+            set
+            {
+                Instance.unityConnectionConfig.AuthOption = value;
+                NotifyChanged(Instance.unityConnectionConfig);
+            }
+        }
+
         static ReactiveProperty<HubConnectionState> _connectionState = new(HubConnectionState.Disconnected);
         public static ReadOnlyReactiveProperty<HubConnectionState> ConnectionState => _connectionState;
 
@@ -171,14 +190,14 @@ namespace com.IvanMurzak.Unity.MCP
                 return;
             }
 
-            if (mcpPlugin.RemoteMcpManagerHub == null)
+            if (mcpPlugin.McpManagerHub == null)
             {
                 _logger.LogCritical("{method}: {instance} is null",
-                    nameof(NotifyToolRequestCompleted), nameof(mcpPlugin.RemoteMcpManagerHub));
+                    nameof(NotifyToolRequestCompleted), nameof(mcpPlugin.McpManagerHub));
                 return;
             }
 
-            await mcpPlugin.RemoteMcpManagerHub.NotifyToolRequestCompleted(request);
+            await mcpPlugin.McpManagerHub.NotifyToolRequestCompleted(request);
         }
 
         public static IDisposable SubscribeOnChanged(Action<UnityConnectionConfig> action, bool invokeImmediately = true)

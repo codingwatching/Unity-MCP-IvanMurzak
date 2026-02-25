@@ -12,6 +12,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using UnityEngine;
@@ -66,6 +67,11 @@ namespace com.IvanMurzak.Unity.MCP
                     config = new UnityConnectionConfig();
                     wasCreated = true;
                 }
+                if (string.IsNullOrEmpty(config.Token))
+                {
+                    config.Token = GenerateToken();
+                    wasCreated = true;
+                }
 
                 return config;
             }
@@ -75,6 +81,14 @@ namespace com.IvanMurzak.Unity.MCP
                     nameof(GetOrCreateConfig), ResourcesFileName, AssetsFilePath);
                 throw e;
             }
+        }
+
+        public static string GenerateToken()
+        {
+            var bytes = new byte[32];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(bytes);
+            return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
         }
 
         public void Save()

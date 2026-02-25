@@ -38,7 +38,9 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
         .SetProperty("args", new JsonArray {
             $"{Args.Port}={UnityMcpPlugin.Port}",
             $"{Args.PluginTimeout}={UnityMcpPlugin.TimeoutMs}",
-            $"{Args.ClientTransportMethod}={TransportMethod.stdio}"
+            $"{Args.ClientTransportMethod}={TransportMethod.stdio}",
+            $"{Args.Authorization}={UnityMcpPlugin.AuthOption}",
+            $"{Args.Token}={UnityMcpPlugin.Token}"
         }, requiredForConfiguration: true)
         .SetPropertyToRemove("url");
 
@@ -52,7 +54,9 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
         .SetProperty("args", new JsonArray {
             $"{Args.Port}={UnityMcpPlugin.Port}",
             $"{Args.PluginTimeout}={UnityMcpPlugin.TimeoutMs}",
-            $"{Args.ClientTransportMethod}={TransportMethod.stdio}"
+            $"{Args.ClientTransportMethod}={TransportMethod.stdio}",
+            $"{Args.Authorization}={UnityMcpPlugin.AuthOption}",
+            $"{Args.Token}={UnityMcpPlugin.Token}"
         }, requiredForConfiguration: true)
         .SetPropertyToRemove("url");
 
@@ -93,8 +97,6 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
             manualStepsOption1!.Add(TemplateTextFieldReadOnly(addMcpServerCommandStdio));
             manualStepsOption1!.Add(TemplateLabelDescription("3. Start Gemini"));
             manualStepsOption1!.Add(TemplateTextFieldReadOnly("gemini --debug"));
-
-            ContainerStdio!.Add(TemplateWarningLabel("REQUIRED: Use --debug flag when starting Gemini is important, it helps MCP server to work properly with Gemini in stdio transport mode."));
 
             ContainerStdio!.Add(manualStepsOption1);
 

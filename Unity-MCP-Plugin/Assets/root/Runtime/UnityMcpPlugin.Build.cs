@@ -111,6 +111,7 @@ namespace com.IvanMurzak.Unity.MCP
                 {
                     _logger.LogInformation("AI Game Developer server host: {host}", Host);
                     config.Host = Host;
+                    config.Token = Token;
                 })
                 .AddLogging(loggingBuilder =>
                 {
