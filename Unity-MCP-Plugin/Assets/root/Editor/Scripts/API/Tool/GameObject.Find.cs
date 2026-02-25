@@ -57,7 +57,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
                     return null;
 
                 return go.ToGameObjectData(
-                    reflector: McpPlugin.McpPlugin.Instance!.McpManager.Reflector,
+                    reflector: UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector,
                     includeData: includeData,
                     includeComponents: includeComponents,
                     includeBounds: includeBounds,

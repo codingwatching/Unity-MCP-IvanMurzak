@@ -31,7 +31,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
     {
         static void PrintSerializers<TTarget>()
         {
-            Debug.Log($"Serialize <b>[{typeof(TTarget)}]</b> priority:\n" + string.Join("\n", McpPlugin.McpPlugin.Instance!.McpManager.Reflector.Converters.GetAllSerializers()
+            Debug.Log($"Serialize <b>[{typeof(TTarget)}]</b> priority:\n" + string.Join("\n", UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector.Converters.GetAllSerializers()
                 .Select(x => $"{x.GetType()}: Priority: {x.SerializationPriority(typeof(TTarget))}")
                 .ToList()));
         }
@@ -53,7 +53,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         }
         static void TestGetConverter(Type type, Type serializerType)
         {
-            var converter = McpPlugin.McpPlugin.Instance!.McpManager.Reflector.Converters.GetConverter(type);
+            var converter = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector.Converters.GetConverter(type);
             Assert.IsNotNull(converter, $"{type}: Converter should not be null.");
             Assert.AreEqual(serializerType, converter!.GetType(), $"{type}: The Converter should be {serializerType}.");
         }
@@ -85,7 +85,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         [UnityTest]
         public IEnumerator SerializeMaterial()
         {
-            var reflector = McpPlugin.McpPlugin.Instance!.McpManager.Reflector;
+            var reflector = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector;
 
             var material = new Material(Shader.Find("Standard"));
 
@@ -122,7 +122,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         [UnityTest]
         public IEnumerator SerializeMaterialArray()
         {
-            var reflector = McpPlugin.McpPlugin.Instance!.McpManager.Reflector;
+            var reflector = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector;
 
             var material1 = new Material(Shader.Find("Standard"));
             var material2 = new Material(Shader.Find("Standard"));
@@ -150,7 +150,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
 
         void Test_Serialize_Deserialize<T>(T sourceObj)
         {
-            var reflector = McpPlugin.McpPlugin.Instance!.McpManager.Reflector;
+            var reflector = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector;
 
             var type = typeof(T);
             var serializedObj = reflector.Serialize(sourceObj, logger: _logger);

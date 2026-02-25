@@ -17,6 +17,7 @@ using com.IvanMurzak.McpPlugin.Common.Model;
 using com.IvanMurzak.ReflectorNet;
 using com.IvanMurzak.ReflectorNet.Model;
 using com.IvanMurzak.Unity.MCP.Editor.API;
+using com.IvanMurzak.Unity.MCP.Editor.Extensions;
 using com.IvanMurzak.Unity.MCP.Runtime.Data;
 using com.IvanMurzak.Unity.MCP.Runtime.Extensions;
 using com.IvanMurzak.Unity.MCP.Runtime.Utils;
@@ -32,7 +33,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
     [UnityTest]
     public IEnumerator ModifyComponent_Vector3()
     {
-      var reflector = McpPlugin.McpPlugin.Instance!.McpManager.Reflector;
+      var reflector = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector;
 
       var child = new GameObject(GO_ParentName).AddChild(GO_Child1Name);
       Assert.IsNotNull(child, "Child GameObject should be created");
@@ -68,7 +69,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
     [UnityTest]
     public IEnumerator ModifyComponent_Material()
     {
-      var reflector = McpPlugin.McpPlugin.Instance!.McpManager.Reflector;
+      var reflector = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector;
 
       // "Standard" shader is always available in a Unity project.
       // Doesn't matter whether it's built-in or URP/HDRP.
@@ -189,7 +190,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
     [UnityTest]
     public IEnumerator ModifyJson_SolarSystem_PlanetsArray()
     {
-      var reflector = McpPlugin.McpPlugin.Instance!.McpManager.Reflector;
+      var reflector = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector;
       var goName = "Solar System";
       var go = new GameObject(goName);
       var solarSystem = go.AddComponent<SolarSystem>();
@@ -392,9 +393,9 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
       // Get the same instanceID but from serializedMember structure
       var firstPlaneInstanceIdFromSerialized = serializedMember!
           .GetField("planets") // planets field
-          ?.GetValue<SerializedMember[]>(McpPlugin.McpPlugin.Instance!.McpManager.Reflector)?.FirstOrDefault() // first planet
+          ?.GetValue<SerializedMember[]>(UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector)?.FirstOrDefault() // first planet
           ?.GetField("planet") // planet GameObject field
-          ?.GetValue<ObjectRef>(McpPlugin.McpPlugin.Instance!.McpManager.Reflector)?.InstanceID ?? 0; // instanceID
+          ?.GetValue<ObjectRef>(UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector)?.InstanceID ?? 0; // instanceID
 
       Assert.AreEqual(firstPlaneInstanceId, firstPlaneInstanceIdFromSerialized, "InstanceID from JSON parsing and SerializedMember should match.");
       Assert.AreEqual(planets[0].GetInstanceID(), firstPlaneInstanceIdFromSerialized, "Planet InstanceID should match the serialized member data.");

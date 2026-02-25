@@ -87,7 +87,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
                     Component = new ComponentDataShallow(targetComponent)
                 };
 
-                var reflector = McpPlugin.McpPlugin.Instance!.McpManager.Reflector;
+                var reflector = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector;
                 var logger = UnityLoggerFactory.LoggerFactory.CreateLogger<Tool_GameObject>();
 
                 if (includeFields || includeProperties)

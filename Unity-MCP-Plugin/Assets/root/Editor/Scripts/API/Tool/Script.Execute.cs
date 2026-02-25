@@ -87,7 +87,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
                 if (result is SerializedMember serializedResult)
                     return serializedResult;
 
-                return McpPlugin.McpPlugin.Instance!.McpManager.Reflector.Serialize(
+                return UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector.Serialize(
                     obj: result,
                     logger: logger);
             });
@@ -115,7 +115,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
             }
 
             var parsedParameters = parameters
-                ?.Select(p => McpPlugin.McpPlugin.Instance!.McpManager.Reflector.Deserialize(
+                ?.Select(p => UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector.Deserialize(
                     data: p,
                     logger: logger))
                 ?.ToArray();

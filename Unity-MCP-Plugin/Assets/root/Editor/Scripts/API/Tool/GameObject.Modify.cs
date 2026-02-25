@@ -70,7 +70,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
 
                     var objToModify = (object)go;
 
-                    var modified = McpPlugin.McpPlugin.Instance!.McpManager.Reflector.TryPopulate(
+                    var modified = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector.TryPopulate(
                         ref objToModify,
                         data: gameObjectDiffs[i],
                         logs: logs,

@@ -308,7 +308,9 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                 UnityBuildAndConnect();
             });
 
-            McpPlugin.McpPlugin.DoAlways(plugin =>
+            UnityMcpPluginEditor.PluginProperty
+                .WhereNotNull()
+                .Subscribe(plugin =>
             {
                 Observable.CombineLatest(
                     UnityMcpPluginEditor.ConnectionState, plugin.KeepConnected,
@@ -638,7 +640,9 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
 
         private void SetupAiAgentSection(VisualElement root)
         {
-            McpPlugin.McpPlugin.DoAlways(plugin =>
+            UnityMcpPluginEditor.PluginProperty
+                .WhereNotNull()
+                .Subscribe(plugin =>
             {
                 plugin.McpManager.OnClientConnected
                     .Subscribe(data =>
@@ -833,7 +837,9 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
 
             btn.RegisterCallback<ClickEvent>(evt => McpToolsWindow.ShowWindow());
 
-            McpPlugin.McpPlugin.DoAlways(plugin =>
+            UnityMcpPluginEditor.PluginProperty
+                .WhereNotNull()
+                .Subscribe(plugin =>
             {
                 var manager = plugin.McpManager.ToolManager;
                 if (manager == null)
@@ -874,7 +880,9 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
 
             btn.RegisterCallback<ClickEvent>(evt => McpPromptsWindow.ShowWindow());
 
-            McpPlugin.McpPlugin.DoAlways(plugin =>
+            UnityMcpPluginEditor.PluginProperty
+                .WhereNotNull()
+                .Subscribe(plugin =>
             {
                 var manager = plugin.McpManager.PromptManager;
                 if (manager == null) { label.text = "0 / 0 prompts"; return; }
@@ -900,7 +908,9 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
 
             btn.RegisterCallback<ClickEvent>(evt => McpResourcesWindow.ShowWindow());
 
-            McpPlugin.McpPlugin.DoAlways(plugin =>
+            UnityMcpPluginEditor.PluginProperty
+                .WhereNotNull()
+                .Subscribe(plugin =>
             {
                 var manager = plugin.McpManager.ResourceManager;
                 if (manager == null) { label.text = "0 / 0 resources"; return; }

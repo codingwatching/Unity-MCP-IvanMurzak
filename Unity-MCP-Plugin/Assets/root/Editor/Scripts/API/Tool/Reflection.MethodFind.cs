@@ -77,7 +77,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
                 if (methods.Count == 0)
                     return $"[Success] Method not found. With request:\n{filter}";
 
-                var reflector = McpPlugin.McpPlugin.Instance!.McpManager.Reflector;
+                var reflector = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector;
 
                 var methodRefs = methods
                     .Select(method => new MethodData(reflector, method, justRef: false))

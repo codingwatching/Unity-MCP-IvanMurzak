@@ -46,7 +46,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
             var methodInfo = classType.GetMethod(name);
 
             var obj = new UnityEditor.Build.NamedBuildTarget();
-            var serializedObj = McpPlugin.McpPlugin.Instance!.McpManager.Reflector.Serialize(obj);
+            var serializedObj = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector.Serialize(obj);
 
             ResultValidation(new Tool_Reflection().MethodCall(
                 filter: new MethodRef(methodInfo),
@@ -81,7 +81,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         [UnityTest]
         public IEnumerator MethodCall_UnityEngine_Transform_LookAt()
         {
-            var reflector = McpPlugin.McpPlugin.Instance!.McpManager.Reflector;
+            var reflector = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector;
 
             var classType = typeof(UnityEngine.Transform);
             var name = nameof(UnityEngine.Transform.LookAt);
@@ -136,7 +136,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         [UnityTest]
         public IEnumerator MethodCall_UnityEngine_GameObject_GetComponent_Transform()
         {
-            var reflector = McpPlugin.McpPlugin.Instance!.McpManager.Reflector;
+            var reflector = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector;
 
             var classType = typeof(UnityEngine.GameObject);
             var methodInfo = classType.GetMethod(nameof(UnityEngine.GameObject.GetComponent), new[] { typeof(System.Type) });
@@ -172,7 +172,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         [UnityTest]
         public IEnumerator MethodCall_UnityEngine_GameObject_SetActive_ReturnsVoid()
         {
-            var reflector = McpPlugin.McpPlugin.Instance!.McpManager.Reflector;
+            var reflector = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector;
 
             var classType = typeof(UnityEngine.GameObject);
             var methodInfo = classType.GetMethod(nameof(UnityEngine.GameObject.SetActive), new[] { typeof(bool) });

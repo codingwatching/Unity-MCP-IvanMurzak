@@ -60,7 +60,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
                 var logs = new Logs();
                 var objToModify = (object)obj;
 
-                var success = McpPlugin.McpPlugin.Instance!.McpManager.Reflector.TryPopulate(
+                var success = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector.TryPopulate(
                     ref objToModify,
                     data: objectDiff,
                     logs: logs,
@@ -74,7 +74,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
                 UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
 
                 // Return updated object data
-                var data = McpPlugin.McpPlugin.Instance!.McpManager.Reflector.Serialize(
+                var data = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector.Serialize(
                     obj,
                     name: obj.name,
                     recursive: true,

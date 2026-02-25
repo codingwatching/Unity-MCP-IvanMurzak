@@ -84,7 +84,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
                 var logs = new Logs();
                 var objToModify = (object)targetComponent;
 
-                var success = McpPlugin.McpPlugin.Instance!.McpManager.Reflector.TryPopulate(
+                var success = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector.TryPopulate(
                     ref objToModify,
                     data: componentDiff,
                     logs: logs,

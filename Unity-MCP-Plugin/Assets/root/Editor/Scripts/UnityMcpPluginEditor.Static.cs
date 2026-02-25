@@ -12,6 +12,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using com.IvanMurzak.McpPlugin;
 using com.IvanMurzak.McpPlugin.Common;
 using com.IvanMurzak.McpPlugin.Common.Model;
 using com.IvanMurzak.Unity.MCP.Utils;
@@ -71,6 +72,12 @@ namespace com.IvanMurzak.Unity.MCP
                 }
             }
         }
+
+        // Replaces McpPlugin.McpPlugin static singleton behavior
+        private static readonly ReactiveProperty<IMcpPlugin?> _pluginProperty = new(null);
+        public static ReadOnlyReactiveProperty<IMcpPlugin?> PluginProperty => _pluginProperty;
+        public static IMcpPlugin? CurrentPlugin => _pluginProperty.Value;
+        private static void SetCurrentPlugin(IMcpPlugin? plugin) => _pluginProperty.Value = plugin;
 
         public static LogLevel LogLevel
         {

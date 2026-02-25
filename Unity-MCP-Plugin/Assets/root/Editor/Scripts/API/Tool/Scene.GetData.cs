@@ -54,7 +54,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
 
                 return new SceneData(
                     scene: scene,
-                    reflector: McpPlugin.McpPlugin.Instance!.McpManager.Reflector,
+                    reflector: UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector,
                     includeRootGameObjects: includeRootGameObjects,
                     includeChildrenDepth: includeChildrenDepth,
                     includeBounds: includeBounds,

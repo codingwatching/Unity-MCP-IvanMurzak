@@ -46,7 +46,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
                 var go = GameObjectUtils.FindByPath(path)
                     ?? throw new System.Exception($"[Error] GameObject by path '{path}' not found.");
 
-                var reflector = McpPlugin.McpPlugin.Instance!.McpManager.Reflector;
+                var reflector = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector;
 
                 return ResponseResourceContent.CreateText(
                     uri: uri,

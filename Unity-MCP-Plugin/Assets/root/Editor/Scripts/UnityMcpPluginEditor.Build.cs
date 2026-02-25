@@ -32,6 +32,7 @@ namespace com.IvanMurzak.Unity.MCP
             _logger.LogDebug("MCP Plugin built in {elapsedMilliseconds} ms.",
                 stopwatch.ElapsedMilliseconds);
 
+            SetCurrentPlugin(built);
             ApplyConfigToMcpPlugin(built);
 
             built.ConnectionState
@@ -46,6 +47,8 @@ namespace com.IvanMurzak.Unity.MCP
             var oldInstance = _plugin.TakeInstance();
             if (oldInstance == null)
                 return;
+
+            SetCurrentPlugin(null);
 
             // Dispose on a background thread to avoid blocking Unity's main thread.
             // The dispose path calls ConnectionManager.DisconnectImmediate() which

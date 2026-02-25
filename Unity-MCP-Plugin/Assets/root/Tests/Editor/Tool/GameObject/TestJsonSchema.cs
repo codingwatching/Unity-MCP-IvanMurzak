@@ -87,7 +87,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         [UnityTest]
         public IEnumerator Primitives()
         {
-            var reflector = McpPlugin.McpPlugin.Instance!.McpManager.Reflector;
+            var reflector = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector;
 
             ValidateType<int>(reflector);
             ValidateType<float>(reflector);
@@ -101,7 +101,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         [UnityTest]
         public IEnumerator Classes()
         {
-            var reflector = McpPlugin.McpPlugin.Instance!.McpManager.Reflector;
+            var reflector = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector;
 
             ValidateType<ObjectRef>(reflector);
 
@@ -124,7 +124,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         [UnityTest]
         public IEnumerator Structs()
         {
-            var reflector = McpPlugin.McpPlugin.Instance!.McpManager.Reflector;
+            var reflector = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector;
 
             ValidateType<DateTime>(reflector);
             ValidateType<TimeSpan>(reflector);
@@ -135,7 +135,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         [UnityTest]
         public IEnumerator UnityStructs()
         {
-            var reflector = McpPlugin.McpPlugin.Instance!.McpManager.Reflector;
+            var reflector = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector;
 
             ValidateType<UnityEngine.Color32>(reflector);
             ValidateType<UnityEngine.Color>(reflector);
@@ -156,7 +156,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         [UnityTest]
         public IEnumerator Unity()
         {
-            var reflector = McpPlugin.McpPlugin.Instance!.McpManager.Reflector;
+            var reflector = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector;
 
             ValidateType<UnityEngine.Object>(reflector);
             ValidateType<UnityEngine.Rigidbody>(reflector);
@@ -172,7 +172,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         [UnityTest]
         public IEnumerator MCP_Tools()
         {
-            var task = McpPlugin.McpPlugin.Instance!.McpManager.ToolManager!.RunListTool(new RequestListTool());
+            var task = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.ToolManager!.RunListTool(new RequestListTool());
             while (!task.IsCompleted)
             {
                 yield return null; // Wait for the task to complete

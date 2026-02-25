@@ -12,7 +12,7 @@
 using com.IvanMurzak.ReflectorNet.Model;
 using com.IvanMurzak.Unity.MCP.Runtime.Data;
 
-namespace com.IvanMurzak.Unity.MCP.Runtime.Extensions
+namespace com.IvanMurzak.Unity.MCP.Editor.Extensions
 {
     public static class ExtensionsSerializedMember
     {
@@ -20,7 +20,7 @@ namespace com.IvanMurzak.Unity.MCP.Runtime.Extensions
         {
             try
             {
-                var objectRef = member.GetValue<ObjectRef>(McpPlugin.McpPlugin.Instance!.McpManager.Reflector);
+                var objectRef = member.GetValue<ObjectRef>(UnityMcpPluginRuntime.Instance.McpPluginInstance!.McpManager.Reflector);
                 if (objectRef != null)
                 {
                     instanceID = objectRef.InstanceID;
@@ -37,7 +37,7 @@ namespace com.IvanMurzak.Unity.MCP.Runtime.Extensions
                 var fieldValue = member.GetField(ObjectRef.ObjectRefProperty.InstanceID);
                 if (fieldValue != null)
                 {
-                    instanceID = fieldValue.GetValue<int>(McpPlugin.McpPlugin.Instance!.McpManager.Reflector);
+                    instanceID = fieldValue.GetValue<int>(UnityMcpPluginRuntime.Instance.McpPluginInstance!.McpManager.Reflector);
                     return true;
                 }
             }
@@ -53,7 +53,7 @@ namespace com.IvanMurzak.Unity.MCP.Runtime.Extensions
         {
             try
             {
-                var objectRef = member.GetValue<GameObjectRef>(McpPlugin.McpPlugin.Instance!.McpManager.Reflector);
+                var objectRef = member.GetValue<GameObjectRef>(UnityMcpPluginRuntime.Instance.McpPluginInstance!.McpManager.Reflector);
                 if (objectRef != null)
                 {
                     instanceID = objectRef.InstanceID;
@@ -70,7 +70,7 @@ namespace com.IvanMurzak.Unity.MCP.Runtime.Extensions
                 var fieldValue = member.GetField(ObjectRef.ObjectRefProperty.InstanceID);
                 if (fieldValue != null)
                 {
-                    instanceID = fieldValue.GetValue<int>(McpPlugin.McpPlugin.Instance!.McpManager.Reflector);
+                    instanceID = fieldValue.GetValue<int>(UnityMcpPluginRuntime.Instance.McpPluginInstance!.McpManager.Reflector);
                     return true;
                 }
             }
