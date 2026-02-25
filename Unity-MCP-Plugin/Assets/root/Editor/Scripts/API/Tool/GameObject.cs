@@ -27,26 +27,28 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
         {
             public static string NotFoundComponent(int componentInstanceID, IEnumerable<UnityEngine.Component> allComponents)
             {
+                var reflector = UnityMcpPluginEditor.Instance.Reflector ?? throw new Exception("Reflector is not available.");
                 var availableComponentsPreview = allComponents
-                    .Select((c, i) => UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector.Serialize(
+                    .Select((c, i) => reflector.Serialize(
                         c,
                         name: $"[{i}]",
                         recursive: false,
                         logger: UnityLoggerFactory.LoggerFactory.CreateLogger<Tool_GameObject>()
                     ))
                     .ToList();
-                var previewJson = availableComponentsPreview.ToJson(UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector);
+                var previewJson = availableComponentsPreview.ToJson(reflector);
 
-                var instanceIdSample = new { componentData = availableComponentsPreview[0] }.ToJson(UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector);
+                var instanceIdSample = new { componentData = availableComponentsPreview[0] }.ToJson(reflector);
                 var helpMessage = $"Use 'name=[index]' to specify the component. Or use 'instanceID' to specify the component.\n{instanceIdSample}";
 
                 return $"[Error] No component with instanceID '{componentInstanceID}' found in GameObject.\n{helpMessage}\nAvailable components preview:\n{previewJson}";
             }
             public static string NotFoundComponents(ComponentRefList componentRefs, IEnumerable<UnityEngine.Component> allComponents)
             {
+                var reflector = UnityMcpPluginEditor.Instance.Reflector ?? throw new Exception("Reflector is not available.");
                 var componentInstanceIDsString = string.Join(", ", componentRefs.Select(cr => cr.ToString()));
                 var availableComponentsPreview = allComponents
-                    .Select((c, i) => UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector.Serialize(
+                    .Select((c, i) => reflector.Serialize(
                         obj: c,
                         fallbackType: typeof(UnityEngine.Component),
                         name: $"[{i}]",
@@ -54,7 +56,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
                         logger: UnityLoggerFactory.LoggerFactory.CreateLogger<Tool_GameObject>()
                     ))
                     .ToList();
-                var previewJson = availableComponentsPreview.ToJson(UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector);
+                var previewJson = availableComponentsPreview.ToJson(reflector);
 
                 return $"[Error] No components with instanceIDs [{componentInstanceIDsString}] found in GameObject.\nAvailable components preview:\n{previewJson}";
             }

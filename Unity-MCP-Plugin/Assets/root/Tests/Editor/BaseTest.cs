@@ -56,13 +56,13 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
 
         private (ResponseData<ResponseCallTool> result, string json) CallToolInternal(string toolName, string json)
         {
-            var reflector = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector;
+            var reflector = UnityMcpPluginEditor.Instance.Reflector;
 
             Debug.Log($"{toolName} Started with JSON:\n{json}");
 
             var parameters = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
             var request = new RequestCallTool(toolName, parameters!);
-            var task = UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.ToolManager!.RunCallTool(request);
+            var task = UnityMcpPluginEditor.Instance.Tools!.RunCallTool(request);
             var result = task.Result;
 
             Debug.Log($"{toolName} Completed");

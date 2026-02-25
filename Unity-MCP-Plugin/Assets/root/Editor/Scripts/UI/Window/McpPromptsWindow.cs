@@ -47,7 +47,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
 
         protected override void RefreshItems()
         {
-            var promptManager = UnityMcpPluginEditor.Instance.McpPluginInstance?.McpManager.PromptManager;
+            var promptManager = UnityMcpPluginEditor.Instance.Prompts;
             var refreshed = new List<PromptViewModel>();
 
             if (promptManager != null)
@@ -63,7 +63,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
 
         protected override void OnItemToggleChanged(PromptViewModel viewModel, bool isEnabled)
         {
-            var promptManager = UnityMcpPluginEditor.Instance.McpPluginInstance?.McpManager.PromptManager;
+            var promptManager = UnityMcpPluginEditor.Instance.Prompts;
             if (promptManager == null)
             {
                 Logger.LogError("{method} PromptManager is not available.", nameof(OnItemToggleChanged));

@@ -47,7 +47,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
 
         protected override void RefreshItems()
         {
-            var toolManager = UnityMcpPluginEditor.Instance.McpPluginInstance?.McpManager.ToolManager;
+            var toolManager = UnityMcpPluginEditor.Instance.Tools;
             var refreshed = new List<ToolViewModel>();
 
             if (toolManager != null)
@@ -63,7 +63,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
 
         protected override void OnItemToggleChanged(ToolViewModel viewModel, bool isEnabled)
         {
-            var toolManager = UnityMcpPluginEditor.Instance.McpPluginInstance?.McpManager.ToolManager;
+            var toolManager = UnityMcpPluginEditor.Instance.Tools;
             if (toolManager == null)
             {
                 Logger.LogError("{method} ToolManager is not available.", nameof(OnItemToggleChanged));

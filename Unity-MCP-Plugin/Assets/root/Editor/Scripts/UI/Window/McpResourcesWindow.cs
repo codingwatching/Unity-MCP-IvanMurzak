@@ -45,7 +45,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
 
         protected override void RefreshItems()
         {
-            var resourceManager = UnityMcpPluginEditor.Instance.McpPluginInstance?.McpManager.ResourceManager;
+            var resourceManager = UnityMcpPluginEditor.Instance.Resources;
             var refreshed = new List<ResourceViewModel>();
 
             if (resourceManager != null)
@@ -61,7 +61,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
 
         protected override void OnItemToggleChanged(ResourceViewModel viewModel, bool isEnabled)
         {
-            var resourceManager = UnityMcpPluginEditor.Instance.McpPluginInstance?.McpManager.ResourceManager;
+            var resourceManager = UnityMcpPluginEditor.Instance.Resources;
             if (resourceManager == null)
             {
                 Logger.LogError("{method} ResourceManager is not available.", nameof(OnItemToggleChanged));

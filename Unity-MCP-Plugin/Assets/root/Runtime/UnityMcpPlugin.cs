@@ -48,6 +48,7 @@ namespace com.IvanMurzak.Unity.MCP
         public IMcpPlugin? McpPluginInstance => _plugin.Instance;
         public bool HasMcpPluginInstance => _plugin.HasInstance;
 
+        public ILogger Logger => McpPluginInstance?.Logger ?? _logger;
         public Reflector? Reflector => McpPluginInstance?.McpManager.Reflector;
         public IToolManager? Tools => McpPluginInstance?.McpManager.ToolManager;
         public IPromptManager? Prompts => McpPluginInstance?.McpManager.PromptManager;

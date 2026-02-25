@@ -18,9 +18,16 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Extensions
     {
         public static bool TryGetInstanceID(this SerializedMember member, out int instanceID)
         {
+            var reflector = UnityMcpPluginEditor.Instance.Reflector;
+            if (reflector == null)
+            {
+                instanceID = 0;
+                return false;
+            }
+
             try
             {
-                var objectRef = member.GetValue<ObjectRef>(UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector);
+                var objectRef = member.GetValue<ObjectRef>(reflector);
                 if (objectRef != null)
                 {
                     instanceID = objectRef.InstanceID;
@@ -37,7 +44,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Extensions
                 var fieldValue = member.GetField(ObjectRef.ObjectRefProperty.InstanceID);
                 if (fieldValue != null)
                 {
-                    instanceID = fieldValue.GetValue<int>(UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector);
+                    instanceID = fieldValue.GetValue<int>(reflector);
                     return true;
                 }
             }
@@ -51,9 +58,16 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Extensions
         }
         public static bool TryGetGameObjectInstanceID(this SerializedMember member, out int instanceID)
         {
+            var reflector = UnityMcpPluginEditor.Instance.Reflector;
+            if (reflector == null)
+            {
+                instanceID = 0;
+                return false;
+            }
+
             try
             {
-                var objectRef = member.GetValue<GameObjectRef>(UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector);
+                var objectRef = member.GetValue<GameObjectRef>(reflector);
                 if (objectRef != null)
                 {
                     instanceID = objectRef.InstanceID;
@@ -70,7 +84,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Extensions
                 var fieldValue = member.GetField(ObjectRef.ObjectRefProperty.InstanceID);
                 if (fieldValue != null)
                 {
-                    instanceID = fieldValue.GetValue<int>(UnityMcpPluginEditor.Instance.McpPluginInstance!.McpManager.Reflector);
+                    instanceID = fieldValue.GetValue<int>(reflector);
                     return true;
                 }
             }
