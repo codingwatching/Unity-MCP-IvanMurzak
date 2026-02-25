@@ -16,6 +16,7 @@ using com.IvanMurzak.ReflectorNet;
 using com.IvanMurzak.ReflectorNet.Utils;
 using com.IvanMurzak.Unity.MCP.Utils;
 using Microsoft.Extensions.Logging;
+using R3;
 using UnityEngine;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -144,6 +145,10 @@ namespace com.IvanMurzak.Unity.MCP
                 .WithResourcesFromAssembly(assemblies);
 
             var mcpPlugin = mcpPluginBuilder.Build(reflector);
+
+            mcpPlugin.ConnectionState
+                .Subscribe(state => _connectionState.Value = state)
+                .AddTo(_disposables);
 
             _logger.LogTrace("{method} completed.", nameof(BuildMcpPlugin));
 

@@ -10,7 +10,6 @@
 
 #nullable enable
 using Microsoft.Extensions.Logging;
-using R3;
 
 namespace com.IvanMurzak.Unity.MCP
 {
@@ -34,10 +33,6 @@ namespace com.IvanMurzak.Unity.MCP
 
             SetCurrentPlugin(built);
             ApplyConfigToMcpPlugin(built);
-
-            built.ConnectionState
-                .Subscribe(state => _connectionState.Value = state)
-                .AddTo(_disposables);
 
             return this;
         }

@@ -12,6 +12,7 @@
 using System.Diagnostics;
 using com.IvanMurzak.McpPlugin;
 using Microsoft.Extensions.Logging;
+using R3;
 
 namespace com.IvanMurzak.Unity.MCP
 {
@@ -39,6 +40,10 @@ namespace com.IvanMurzak.Unity.MCP
                 stopwatch.ElapsedMilliseconds);
 
             ApplyConfigToMcpPlugin(built);
+
+            built.ConnectionState
+                .Subscribe(state => _connectionState.Value = state)
+                .AddTo(_disposables);
 
             _logger.LogTrace("{method} completed.", nameof(BuildFromBuilder));
             return built;
