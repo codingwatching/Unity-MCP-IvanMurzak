@@ -91,17 +91,15 @@ namespace com.IvanMurzak.Unity.MCP
         /// Call <see cref="UnityMcpPluginRuntime.DisposeInstance()"/>
         /// to shut it down, or exit Play mode (handled automatically).
         /// </summary>
-        public void Build()
+        public IMcpPlugin Build()
         {
             _logger?.LogTrace("{method} called.", nameof(Build));
 
-            _logger?.LogTrace("{method}: Building runtime MCP Plugin from builder...", nameof(Build));
+            _logger?.LogDebug("{method}: Building runtime MCP Plugin from builder...", nameof(Build));
             var built = _runtimePlugin.BuildFromBuilder(McpPlugin);
 
-            _logger?.LogTrace("{method}: Connecting runtime MCP Plugin to server...", nameof(Build));
-            _ = built.Connect();
-
             _logger?.LogTrace("{method} completed.", nameof(Build));
+            return built;
         }
     }
 }
