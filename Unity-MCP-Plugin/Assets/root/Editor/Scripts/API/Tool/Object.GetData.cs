@@ -51,7 +51,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
 
                 var reflector = UnityMcpPluginEditor.Instance.Reflector ?? throw new Exception("Reflector is not available.");
 
-                return UnityMcpPluginEditor.Instance.Reflector.Serialize(
+                return reflector.Serialize(
                     obj,
                     name: obj.name,
                     recursive: true,
