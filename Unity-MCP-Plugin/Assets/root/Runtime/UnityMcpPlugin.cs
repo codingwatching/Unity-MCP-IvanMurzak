@@ -41,6 +41,10 @@ namespace com.IvanMurzak.Unity.MCP
         protected readonly CompositeDisposable _disposables = new();
         protected readonly McpPluginSlot _plugin = new();
 
+        // Tracks only the latest plugin's ConnectionState subscription.
+        // Replaced (old one disposed) each time BuildMcpPlugin creates a new IMcpPlugin instance.
+        private IDisposable? _pluginConnectionSubscription;
+
         public IMcpPlugin? McpPluginInstance => _plugin.Instance;
         public bool HasMcpPluginInstance => _plugin.HasInstance;
 
@@ -71,6 +75,8 @@ namespace com.IvanMurzak.Unity.MCP
 
         public virtual void Dispose()
         {
+            _pluginConnectionSubscription?.Dispose();
+            _pluginConnectionSubscription = null;
             _disposables.Dispose();
             // LogCollector and _connectionState are disposed by _disposables
             LogCollector = null;

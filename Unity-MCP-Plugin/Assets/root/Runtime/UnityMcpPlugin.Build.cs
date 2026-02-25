@@ -146,9 +146,9 @@ namespace com.IvanMurzak.Unity.MCP
 
             var mcpPlugin = mcpPluginBuilder.Build(reflector);
 
-            mcpPlugin.ConnectionState
-                .Subscribe(state => _connectionState.Value = state)
-                .AddTo(_disposables);
+            _pluginConnectionSubscription?.Dispose();
+            _pluginConnectionSubscription = mcpPlugin.ConnectionState
+                .Subscribe(state => _connectionState.Value = state);
 
             _logger.LogTrace("{method} completed.", nameof(BuildMcpPlugin));
 
