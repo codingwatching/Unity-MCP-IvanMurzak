@@ -21,7 +21,7 @@ namespace com.IvanMurzak.Unity.MCP
     {
         protected readonly object configMutex = new();
 
-        protected UnityConnectionConfig unityConnectionConfig;
+        protected UnityConnectionConfig unityConnectionConfig = null!; // Set by subclass constructors
 
         public class UnityConnectionConfig : ConnectionConfig
         {

@@ -325,6 +325,7 @@ openupm add com.ivanmurzak.unity.mcp
   ```bash
   gemini mcp add ai-game-developer <command>
   ```
+
   > 上の表から`<command>`を置き換えてください
 </details>
 
@@ -334,6 +335,7 @@ openupm add com.ivanmurzak.unity.mcp
   ```bash
   claude mcp add ai-game-developer <command>
   ```
+
   > 上の表から`<command>`を置き換えてください
 </details>
 
@@ -469,9 +471,22 @@ public static class Prompt_ScriptingCode
 **[Unity MCP](https://github.com/IvanMurzak/Unity-MCP)**をゲーム/アプリで使用します。ツール、リソース、プロンプトを使用できます。デフォルトではツールがないため、カスタムツールを実装する必要があります。
 
 ```csharp
-UnityMcpPlugin.BuildAndStart(); // Unity-MCP-Pluginをビルドして起動、これは必須です
-UnityMcpPlugin.Connect(); // Unity-MCP-Serverへのリトライ付きアクティブ接続を開始
-UnityMcpPlugin.Disconnect(); // アクティブな接続を停止し、既存の接続を閉じる
+// MCPプラグインをビルド
+var mcpPlugin = UnityMcpPluginRuntime.Initialize(builder =>
+    {
+        builder.WithConfig(config =>
+        {
+            config.Host = "http://localhost:8080";
+            config.Token = "your-token";
+        });
+        // 現在のアセンブリからすべてのツールを自動登録
+        builder.WithToolsFromAssembly(Assembly.GetExecutingAssembly());
+    })
+    .Build();
+
+await mcpPlugin.Connect(); // Unity-MCP-Serverへの再試行付きアクティブ接続を開始
+
+await mcpPlugin.Disconnect(); // アクティブ接続を停止し、既存の接続を閉じる
 ```
 
 ## サンプル：AI駆動のチェスゲームボット

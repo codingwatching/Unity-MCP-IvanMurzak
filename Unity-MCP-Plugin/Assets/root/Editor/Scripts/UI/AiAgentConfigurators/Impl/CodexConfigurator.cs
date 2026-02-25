@@ -1,4 +1,4 @@
-/*
+﻿/*
 ┌──────────────────────────────────────────────────────────────────┐
 │  Author: Ivan Murzak (https://github.com/IvanMurzak)             │
 │  Repository: GitHub (https://github.com/IvanMurzak/Unity-MCP)    │
@@ -42,10 +42,10 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
         .SetProperty("enabled", true, requiredForConfiguration: true) // Codex requires an "enabled" property
         .SetProperty("command", McpServerManager.ExecutableFullPath.Replace('\\', '/'), requiredForConfiguration: true, comparison: ValueComparisonMode.Path)
         .SetProperty("args", new[] {
-            $"{Args.Port}={UnityMcpPlugin.Port}",
-            $"{Args.PluginTimeout}={UnityMcpPlugin.TimeoutMs}",
+            $"{Args.Port}={UnityMcpPluginEditor.Port}",
+            $"{Args.PluginTimeout}={UnityMcpPluginEditor.TimeoutMs}",
             $"{Args.ClientTransportMethod}={TransportMethod.stdio}",
-            $"{Args.Authorization}={UnityMcpPlugin.AuthOption}"
+            $"{Args.Authorization}={UnityMcpPluginEditor.AuthOption}"
         }, requiredForConfiguration: true)
         .SetProperty("tool_timeout_sec", 300, requiredForConfiguration: false) // Optional: Set a longer tool timeout for Codex
         .SetPropertyToRemove("url")
@@ -64,10 +64,10 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
         .SetProperty("enabled", true, requiredForConfiguration: true) // Codex requires an "enabled" property
         .SetProperty("command", McpServerManager.ExecutableFullPath.Replace('\\', '/'), requiredForConfiguration: true, comparison: ValueComparisonMode.Path)
         .SetProperty("args", new[] {
-            $"{Args.Port}={UnityMcpPlugin.Port}",
-            $"{Args.PluginTimeout}={UnityMcpPlugin.TimeoutMs}",
+            $"{Args.Port}={UnityMcpPluginEditor.Port}",
+            $"{Args.PluginTimeout}={UnityMcpPluginEditor.TimeoutMs}",
             $"{Args.ClientTransportMethod}={TransportMethod.stdio}",
-            $"{Args.Authorization}={UnityMcpPlugin.AuthOption}"
+            $"{Args.Authorization}={UnityMcpPluginEditor.AuthOption}"
         }, requiredForConfiguration: true)
         .SetProperty("tool_timeout_sec", 300, requiredForConfiguration: false) // Optional: Set a longer tool timeout for Codex
         .SetPropertyToRemove("url")
@@ -84,7 +84,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
             bodyPath: "mcp_servers"
         )
         .SetProperty("enabled", true, requiredForConfiguration: true) // Codex requires an "enabled" property
-        .SetProperty("url", UnityMcpPlugin.Host, requiredForConfiguration: true, comparison: ValueComparisonMode.Url)
+        .SetProperty("url", UnityMcpPluginEditor.Host, requiredForConfiguration: true, comparison: ValueComparisonMode.Url)
         .SetProperty("tool_timeout_sec", 300, requiredForConfiguration: false) // Optional: Set a longer tool timeout for Codex
         .SetProperty("startup_timeout_sec", 30, requiredForConfiguration: false) // Optional: Set a startup timeout for HTTP connection attempts
         .SetPropertyToRemove("command")
@@ -100,7 +100,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
             bodyPath: "mcp_servers"
         )
         .SetProperty("enabled", true, requiredForConfiguration: true) // Codex requires an "enabled" property
-        .SetProperty("url", UnityMcpPlugin.Host, requiredForConfiguration: true, comparison: ValueComparisonMode.Url)
+        .SetProperty("url", UnityMcpPluginEditor.Host, requiredForConfiguration: true, comparison: ValueComparisonMode.Url)
         .SetProperty("tool_timeout_sec", 300, requiredForConfiguration: false) // Optional: Set a longer tool timeout for Codex
         .SetProperty("startup_timeout_sec", 30, requiredForConfiguration: false) // Optional: Set a startup timeout for HTTP connection attempts
         .SetPropertyToRemove("command")
@@ -112,8 +112,8 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
             base.ApplyHttpAuthorizationConfig(config);
 
             var tomlConfig = config as TomlAiAgentConfig ?? throw new System.InvalidCastException($"Expected TomlAiAgentConfig for Codex HTTP configuration but got {config.GetType().Name}");
-            var isRequired = UnityMcpPlugin.AuthOption == AuthOption.required;
-            var token = UnityMcpPlugin.Token;
+            var isRequired = UnityMcpPluginEditor.AuthOption == AuthOption.required;
+            var token = UnityMcpPluginEditor.Token;
 
             const string envVarNameBearerToken = "bearer_token_env_var";
 
@@ -134,8 +134,8 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
         {
             base.OnUICreated(root);
 
-            var addMcpServerCommandStdio = $"codex mcp add {AiAgentConfig.DefaultMcpServerName} \"{McpServerManager.ExecutableFullPath}\" port={UnityMcpPlugin.Port} plugin-timeout={UnityMcpPlugin.TimeoutMs} client-transport=stdio";
-            var addMcpServerCommandHttp = $"codex mcp add {AiAgentConfig.DefaultMcpServerName} --url {UnityMcpPlugin.Host}";
+            var addMcpServerCommandStdio = $"codex mcp add {AiAgentConfig.DefaultMcpServerName} \"{McpServerManager.ExecutableFullPath}\" port={UnityMcpPluginEditor.Port} plugin-timeout={UnityMcpPluginEditor.TimeoutMs} client-transport=stdio";
+            var addMcpServerCommandHttp = $"codex mcp add {AiAgentConfig.DefaultMcpServerName} --url {UnityMcpPluginEditor.Host}";
 
             // STDIO Configuration
 
@@ -166,16 +166,16 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
 
             // HTTP Configuration
 
-            if (UnityMcpPlugin.AuthOption == AuthOption.required)
+            if (UnityMcpPluginEditor.AuthOption == AuthOption.required)
             {
                 // ContainerHttp!.Add(TemplateAlertLabel($"Authorization is not fully functional in Codex. Consider to disable Authorization or use another AI agent."));
 
                 ContainerHttp!.Add(TemplateWarningLabel($"Authorization is enabled. Set the '{EnvVarNameAuthToken}' environment variable before starting Codex in terminal."));
 #if UNITY_EDITOR_WIN
-                ContainerHttp!.Add(TemplateTextFieldReadOnly($"setx {EnvVarNameAuthToken} \"{UnityMcpPlugin.Token}\""));
+                ContainerHttp!.Add(TemplateTextFieldReadOnly($"setx {EnvVarNameAuthToken} \"{UnityMcpPluginEditor.Token}\""));
                 ContainerHttp!.Add(TemplateWarningLabel($"Terminal restart required."));
 #else
-                ContainerHttp!.Add(TemplateTextFieldReadOnly($"export {EnvVarNameAuthToken}=\"{UnityMcpPlugin.Token}\""));
+                ContainerHttp!.Add(TemplateTextFieldReadOnly($"export {EnvVarNameAuthToken}=\"{UnityMcpPluginEditor.Token}\""));
 #endif
             }
 

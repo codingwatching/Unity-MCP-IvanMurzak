@@ -325,6 +325,7 @@ openupm add com.ivanmurzak.unity.mcp
   ```bash
   gemini mcp add ai-game-developer <command>
   ```
+
   > 从上表中替换`<command>`
 </details>
 
@@ -334,6 +335,7 @@ openupm add com.ivanmurzak.unity.mcp
   ```bash
   claude mcp add ai-game-developer <command>
   ```
+
   > 从上表中替换`<command>`
 </details>
 
@@ -469,9 +471,22 @@ public static class Prompt_ScriptingCode
 在您的游戏/应用中使用 **[Unity MCP](https://github.com/IvanMurzak/Unity-MCP)**。使用工具、资源或提示。默认情况下没有工具，您需要实现自定义工具。
 
 ```csharp
-UnityMcpPlugin.BuildAndStart(); // 构建并启动Unity-MCP-Plugin，这是必需的
-UnityMcpPlugin.Connect(); // 启动与Unity-MCP-Server的主动连接并重试
-UnityMcpPlugin.Disconnect(); // 停止主动连接并关闭现有连接
+// 构建 MCP 插件
+var mcpPlugin = UnityMcpPluginRuntime.Initialize(builder =>
+    {
+        builder.WithConfig(config =>
+        {
+            config.Host = "http://localhost:8080";
+            config.Token = "your-token";
+        });
+        // 自动注册当前程序集中的所有工具
+        builder.WithToolsFromAssembly(Assembly.GetExecutingAssembly());
+    })
+    .Build();
+
+await mcpPlugin.Connect(); // 启动与 Unity-MCP-Server 的主动连接（含重试）
+
+await mcpPlugin.Disconnect(); // 停止主动连接并关闭现有连接
 ```
 
 ## 示例：AI驱动的国际象棋游戏机器人

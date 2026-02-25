@@ -327,6 +327,7 @@ If automatic configuration doesn't work for you for any reason, use the JSON fro
   ```bash
   gemini mcp add ai-game-developer <command>
   ```
+
   > Replace `<command>` from the table above
 </details>
 
@@ -336,6 +337,7 @@ If automatic configuration doesn't work for you for any reason, use the JSON fro
   ```bash
   claude mcp add ai-game-developer <command>
   ```
+
   > Replace `<command>` from the table above
 </details>
 
@@ -471,9 +473,22 @@ public static class Prompt_ScriptingCode
 Use **[Unity MCP](https://github.com/IvanMurzak/Unity-MCP)** in your game/app. Use Tools, Resources or Prompts. By default there are no tools, you would need to implement your custom.
 
 ```csharp
-UnityMcpPlugin.BuildAndStart(); // Build and start Unity-MCP-Plugin, it is required
-UnityMcpPlugin.Connect(); // Start active connection with retry to Unity-MCP-Server
-UnityMcpPlugin.Disconnect(); // Stop active connection and close existed connection
+// Build MCP plugin
+var mcpPlugin = UnityMcpPluginRuntime.Initialize(builder =>
+    {
+        builder.WithConfig(config =>
+        {
+            config.Host = "http://localhost:8080";
+            config.Token = "your-token";
+        });
+        // Automatically register all tools from the current assembly
+        builder.WithToolsFromAssembly(Assembly.GetExecutingAssembly());
+    })
+    .Build();
+
+await mcpPlugin.Connect(); // Start active connection with retry to Unity-MCP-Server
+
+await mcpPlugin.Disconnect(); // Stop active connection and close existed connection
 ```
 
 ## Sample: AI powered Chess game bot

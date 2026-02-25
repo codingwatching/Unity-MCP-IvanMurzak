@@ -1,4 +1,4 @@
-/*
+﻿/*
 ┌──────────────────────────────────────────────────────────────────┐
 │  Author: Ivan Murzak (https://github.com/IvanMurzak)             │
 │  Repository: GitHub (https://github.com/IvanMurzak/Unity-MCP)    │
@@ -52,8 +52,8 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
             .SetProperty("type", JsonValue.Create("stdio"), requiredForConfiguration: true)
             .SetProperty("command", JsonValue.Create(McpServerManager.ExecutableFullPath.Replace('\\', '/')), requiredForConfiguration: true)
             .SetProperty("args", new JsonArray {
-                $"{Consts.MCP.Server.Args.Port}={UnityMcpPlugin.Port}",
-                $"{Consts.MCP.Server.Args.PluginTimeout}={UnityMcpPlugin.TimeoutMs}",
+                $"{Consts.MCP.Server.Args.Port}={UnityMcpPluginEditor.Port}",
+                $"{Consts.MCP.Server.Args.PluginTimeout}={UnityMcpPluginEditor.TimeoutMs}",
                 $"{Consts.MCP.Server.Args.ClientTransportMethod}={TransportMethod.stdio}"
             }, requiredForConfiguration: true)
             .SetPropertyToRemove("url");
@@ -66,7 +66,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
                 configPath: configPath,
                 bodyPath: bodyPath)
             .SetProperty("type", JsonValue.Create($"{TransportMethod.streamableHttp}"), requiredForConfiguration: true)
-            .SetProperty("url", JsonValue.Create(UnityMcpPlugin.Host), requiredForConfiguration: true)
+            .SetProperty("url", JsonValue.Create(UnityMcpPluginEditor.Host), requiredForConfiguration: true)
             .SetPropertyToRemove("command")
             .SetPropertyToRemove("args");
         }
@@ -211,7 +211,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
 
             var url = serverEntry!["url"]?.GetValue<string>();
             Assert.IsNotNull(url, "url should not be null");
-            Assert.AreEqual(UnityMcpPlugin.Host, url, "url should match McpServerUrl");
+            Assert.AreEqual(UnityMcpPluginEditor.Host, url, "url should match McpServerUrl");
 
             yield return null;
         }
@@ -394,7 +394,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
                 ""mcpServers"": {{
                     ""{AiAgentConfig.DefaultMcpServerName}"": {{
                         ""command"": ""{executable}"",
-                        ""args"": [""{Consts.MCP.Server.Args.Port}={UnityMcpPlugin.Port}"", ""{Consts.MCP.Server.Args.PluginTimeout}={UnityMcpPlugin.TimeoutMs}""],
+                        ""args"": [""{Consts.MCP.Server.Args.Port}={UnityMcpPluginEditor.Port}"", ""{Consts.MCP.Server.Args.PluginTimeout}={UnityMcpPluginEditor.TimeoutMs}""],
                         ""url"": ""http://localhost:50000/mcp""
                     }}
                 }}
@@ -419,7 +419,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
             var missingCommandJson = $@"{{
                 ""mcpServers"": {{
                     ""{AiAgentConfig.DefaultMcpServerName}"": {{
-                        ""args"": [""{Consts.MCP.Server.Args.Port}={UnityMcpPlugin.Port}"", ""{Consts.MCP.Server.Args.PluginTimeout}={UnityMcpPlugin.TimeoutMs}""]
+                        ""args"": [""{Consts.MCP.Server.Args.Port}={UnityMcpPluginEditor.Port}"", ""{Consts.MCP.Server.Args.PluginTimeout}={UnityMcpPluginEditor.TimeoutMs}""]
                     }}
                 }}
             }}";
@@ -445,7 +445,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
                 ""mcpServers"": {{
                     ""{AiAgentConfig.DefaultMcpServerName}"": {{
                         ""command"": ""{executable}"",
-                        ""args"": [""{Consts.MCP.Server.Args.Port}=99999"", ""{Consts.MCP.Server.Args.PluginTimeout}={UnityMcpPlugin.TimeoutMs}""]
+                        ""args"": [""{Consts.MCP.Server.Args.Port}=99999"", ""{Consts.MCP.Server.Args.PluginTimeout}={UnityMcpPluginEditor.TimeoutMs}""]
                     }}
                 }}
             }}";
@@ -487,7 +487,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         {
             // Arrange - create config with both http and command properties (invalid state)
             var bodyPath = "mcpServers";
-            var url = UnityMcpPlugin.Host;
+            var url = UnityMcpPluginEditor.Host;
             var mixedJson = $@"{{
                 ""mcpServers"": {{
                     ""{AiAgentConfig.DefaultMcpServerName}"": {{
@@ -514,7 +514,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         {
             // Arrange - create config with both http and args properties (invalid state)
             var bodyPath = "mcpServers";
-            var url = UnityMcpPlugin.Host;
+            var url = UnityMcpPluginEditor.Host;
             var mixedJson = $@"{{
                 ""mcpServers"": {{
                     ""{AiAgentConfig.DefaultMcpServerName}"": {{
@@ -565,7 +565,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         {
             // Arrange
             var bodyPath = "mcpServers";
-            var url = UnityMcpPlugin.Host;
+            var url = UnityMcpPluginEditor.Host;
             var wrongTypeJson = $@"{{
                 ""mcpServers"": {{
                     ""{AiAgentConfig.DefaultMcpServerName}"": {{
@@ -799,7 +799,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
                     ""otherServer"": {{
                         ""type"": ""stdio"",
                         ""command"": ""{executable}"",
-                        ""args"": [""{Consts.MCP.Server.Args.Port}={UnityMcpPlugin.Port}"", ""{Consts.MCP.Server.Args.PluginTimeout}={UnityMcpPlugin.TimeoutMs}"", ""{Consts.MCP.Server.Args.ClientTransportMethod}=stdio""]
+                        ""args"": [""{Consts.MCP.Server.Args.Port}={UnityMcpPluginEditor.Port}"", ""{Consts.MCP.Server.Args.PluginTimeout}={UnityMcpPluginEditor.TimeoutMs}"", ""{Consts.MCP.Server.Args.ClientTransportMethod}=stdio""]
                     }}
                 }}
             }}";
@@ -826,7 +826,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
                     ""otherServer"": {{
                         ""type"": ""stdio"",
                         ""command"": ""{executable}"",
-                        ""args"": [""{Consts.MCP.Server.Args.Port}={UnityMcpPlugin.Port}"", ""{Consts.MCP.Server.Args.PluginTimeout}={UnityMcpPlugin.TimeoutMs}"", ""{Consts.MCP.Server.Args.ClientTransportMethod}=stdio""]
+                        ""args"": [""{Consts.MCP.Server.Args.Port}={UnityMcpPluginEditor.Port}"", ""{Consts.MCP.Server.Args.PluginTimeout}={UnityMcpPluginEditor.TimeoutMs}"", ""{Consts.MCP.Server.Args.ClientTransportMethod}=stdio""]
                     }},
                     ""{AiAgentConfig.DefaultMcpServerName}"": {{
                         ""type"": ""stdio"",
@@ -852,7 +852,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         {
             // Arrange - another server entry has matching http properties, but DefaultMcpServerName doesn't exist
             var bodyPath = "mcpServers";
-            var url = UnityMcpPlugin.Host;
+            var url = UnityMcpPluginEditor.Host;
             var json = $@"{{
                 ""mcpServers"": {{
                     ""otherServer"": {{
@@ -1020,7 +1020,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         {
             // Arrange - existing file with the same server under a custom name
             var bodyPath = "mcpServers";
-            var url = UnityMcpPlugin.Host;
+            var url = UnityMcpPluginEditor.Host;
             var existingJson = $@"{{
                 ""mcpServers"": {{
                     ""my-custom-name"": {{
@@ -1051,7 +1051,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         {
             // Arrange - existing file with the same server under a custom name using serverUrl
             var bodyPath = "mcpServers";
-            var url = UnityMcpPlugin.Host;
+            var url = UnityMcpPluginEditor.Host;
             var existingJson = $@"{{
                 ""mcpServers"": {{
                     ""my-custom-name"": {{
@@ -1089,7 +1089,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         {
             // Arrange - existing file with a server using serverUrl but config does NOT add serverUrl identity key
             var bodyPath = "mcpServers";
-            var url = UnityMcpPlugin.Host;
+            var url = UnityMcpPluginEditor.Host;
             var existingJson = $@"{{
                 ""mcpServers"": {{
                     ""my-custom-name"": {{
@@ -1196,7 +1196,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.Tests
         {
             // Arrange - file only contains a duplicate entry matching by url
             var bodyPath = "mcpServers";
-            var url = UnityMcpPlugin.Host;
+            var url = UnityMcpPluginEditor.Host;
             var existingJson = $@"{{
                 ""{bodyPath}"": {{
                     ""my-custom-name"": {{
