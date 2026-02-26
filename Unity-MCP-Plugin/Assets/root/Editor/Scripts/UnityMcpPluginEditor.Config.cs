@@ -14,13 +14,32 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
+using UnityEngine;
 
 namespace com.IvanMurzak.Unity.MCP
 {
     public partial class UnityMcpPluginEditor
     {
         public static string ResourcesFileName => "AI-Game-Developer-Config";
+
+        /// <summary>
+        /// Project-relative path used by Unity's AssetDatabase API.
+        /// Do NOT use this with System.IO File/Directory operations — use <see cref="AssetsFileAbsolutePath"/> instead.
+        /// </summary>
         public static string AssetsFilePath => $"UserSettings/{ResourcesFileName}.json";
+
+        /// <summary>
+        /// Gets the Unity project root folder path (the folder that contains the Assets directory).
+        /// Uses <see cref="Application.dataPath"/> to ensure correctness regardless of the process working directory.
+        /// </summary>
+        public static string ProjectRootPath => Path.GetDirectoryName(Application.dataPath)!;
+
+        /// <summary>
+        /// Absolute path to the config file for use with System.IO File/Directory operations.
+        /// </summary>
+        public static string AssetsFileAbsolutePath => Path.GetFullPath(
+            Path.Combine(Application.dataPath, "..", "UserSettings", $"{ResourcesFileName}.json"));
+
 #if UNITY_EDITOR
         public static UnityEngine.TextAsset AssetFile => UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.TextAsset>(AssetsFilePath);
 #endif
@@ -32,7 +51,8 @@ namespace com.IvanMurzak.Unity.MCP
             try
             {
                 // Both Edit mode and Play mode read from the same UserSettings JSON file
-                var json = File.Exists(AssetsFilePath) ? File.ReadAllText(AssetsFilePath) : null;
+                // Use the absolute path so File.Exists/ReadAllText resolve correctly regardless of CWD.
+                var json = File.Exists(AssetsFileAbsolutePath) ? File.ReadAllText(AssetsFileAbsolutePath) : null;
 
                 UnityConnectionConfig? config = null;
                 try
@@ -78,7 +98,7 @@ namespace com.IvanMurzak.Unity.MCP
             Validate();
             try
             {
-                var directory = Path.GetDirectoryName(AssetsFilePath);
+                var directory = Path.GetDirectoryName(AssetsFileAbsolutePath);
                 if (!Directory.Exists(directory))
                     Directory.CreateDirectory(directory!);
 
@@ -113,7 +133,7 @@ namespace com.IvanMurzak.Unity.MCP
                     WriteIndented = true,
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 });
-                File.WriteAllText(AssetsFilePath, json);
+                File.WriteAllText(AssetsFileAbsolutePath, json);
 
                 var assetFile = AssetFile;
                 if (assetFile != null)
