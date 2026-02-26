@@ -138,6 +138,29 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
             "About authorization tokens:\n" +
             Tooltip_AuthorizationTokenConcept;
 
+        private const string Tooltip_ToolsCountLabel =
+            "In MCP, a Tool is an executable function the AI agent can invoke to perform an action — " +
+            "creating GameObjects, modifying assets, running scripts, reading scene data, and more. " +
+            "Tools are the primary instrument through which the AI interacts with your Unity project.\n\n" +
+            "Every active tool contributes tokens to the AI's context window. A smaller context means " +
+            "the AI has more room to reason, producing better and more accurate results. " +
+            "Disable tools you don't use to keep context consumption low.";
+
+        private const string Tooltip_PromptsCountLabel =
+            "In MCP, a Prompt is a slash-command the user can invoke directly from the AI client " +
+            "(e.g. /setup-basic-scene). Each prompt can accept arguments, and when triggered it " +
+            "injects a pre-written instruction into the AI context, guiding the AI on what to do next.\n\n" +
+            "Prompts do not passively consume context tokens — they only use context at the moment " +
+            "a user explicitly invokes them.";
+
+        private const string Tooltip_ResourcesCountLabel =
+            "In MCP, a Resource is a named, read-only data provider the AI agent can query to " +
+            "understand your Unity project. Resources expose structured information such as scene " +
+            "hierarchy, asset metadata, and project settings without performing any actions or " +
+            "modifications.\n\n" +
+            "Resources are fetched on-demand when the AI needs specific project information. " +
+            "Unlike tools, they never modify any state.";
+
         private const string Tooltip_BtnGenerateToken =
             "Generate a new cryptographically secure random token.\n\n" +
             "Uses a cryptographic RNG to produce 32 bytes (256 bits) of randomness encoded as " +
@@ -847,6 +870,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                 if (manager == null)
                 {
                     label.text = "0 / 0 tools";
+                    label.tooltip = Tooltip_ToolsCountLabel + "\n\n0 enabled / 0 disabled / 0 total";
                     if (tokenLabel != null) tokenLabel.text = "~0 tokens total";
                     return;
                 }
@@ -854,8 +878,11 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                 void UpdateStats()
                 {
                     var all = manager.GetAllTools();
+                    var totalCount = all.Count();
                     var enabledCount = all.Count(t => manager.IsToolEnabled(t.Name));
-                    label.text = $"{enabledCount} / {all.Count()} tools";
+                    var disabledCount = totalCount - enabledCount;
+                    label.text = $"{enabledCount} / {totalCount} tools";
+                    label.tooltip = $"{Tooltip_ToolsCountLabel}\n\n{enabledCount} enabled / {disabledCount} disabled / {totalCount} total";
 
                     // Calculate total tokens for enabled tools
                     if (tokenLabel != null)
@@ -887,12 +914,21 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                 .Subscribe(plugin =>
             {
                 var manager = plugin.McpManager.PromptManager;
-                if (manager == null) { label.text = "0 / 0 prompts"; return; }
+                if (manager == null)
+                {
+                    label.text = "0 / 0 prompts";
+                    label.tooltip = Tooltip_PromptsCountLabel + "\n\n0 enabled / 0 disabled / 0 total";
+                    return;
+                }
 
                 void UpdateStats()
                 {
                     var all = manager.GetAllPrompts();
-                    label.text = $"{all.Count(p => manager.IsPromptEnabled(p.Name))} / {all.Count()} prompts";
+                    var totalCount = all.Count();
+                    var enabledCount = all.Count(p => manager.IsPromptEnabled(p.Name));
+                    var disabledCount = totalCount - enabledCount;
+                    label.text = $"{enabledCount} / {totalCount} prompts";
+                    label.tooltip = $"{Tooltip_PromptsCountLabel}\n\n{enabledCount} enabled / {disabledCount} disabled / {totalCount} total";
                 }
                 UpdateStats();
 
@@ -915,12 +951,21 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                 .Subscribe(plugin =>
             {
                 var manager = plugin.McpManager.ResourceManager;
-                if (manager == null) { label.text = "0 / 0 resources"; return; }
+                if (manager == null)
+                {
+                    label.text = "0 / 0 resources";
+                    label.tooltip = Tooltip_ResourcesCountLabel + "\n\n0 enabled / 0 disabled / 0 total";
+                    return;
+                }
 
                 void UpdateStats()
                 {
                     var all = manager.GetAllResources();
-                    label.text = $"{all.Count(r => manager.IsResourceEnabled(r.Name))} / {all.Count()} resources";
+                    var totalCount = all.Count();
+                    var enabledCount = all.Count(r => manager.IsResourceEnabled(r.Name));
+                    var disabledCount = totalCount - enabledCount;
+                    label.text = $"{enabledCount} / {totalCount} resources";
+                    label.tooltip = $"{Tooltip_ResourcesCountLabel}\n\n{enabledCount} enabled / {disabledCount} disabled / {totalCount} total";
                 }
                 UpdateStats();
 
