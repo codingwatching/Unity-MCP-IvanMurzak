@@ -163,6 +163,24 @@ namespace com.IvanMurzak.Unity.MCP
                 NotifyChanged(Instance.unityConnectionConfig);
             }
         }
+        public static bool GenerateSkillFiles
+        {
+            get => Instance.unityConnectionConfig.GenerateSkillFiles;
+            set
+            {
+                Instance.unityConnectionConfig.GenerateSkillFiles = value;
+                NotifyChanged(Instance.unityConnectionConfig);
+            }
+        }
+        public static string SkillsRootFolder
+        {
+            get => Instance.unityConnectionConfig.SkillsRootFolder;
+            set
+            {
+                Instance.unityConnectionConfig.SkillsRootFolder = value;
+                NotifyChanged(Instance.unityConnectionConfig);
+            }
+        }
 
         // 'new' is intentional: static dispatch on the subtype, instance logic lives in the base.
         public static new ReadOnlyReactiveProperty<HubConnectionState> ConnectionState

@@ -97,9 +97,23 @@
                     </ui:VisualElement>
                     <ui:Button name="btnOpenTools" text="Open" class="btn-secondary" />
                 </ui:VisualElement>
-                <ui:Foldout text="Information" value="false" class="base-foldout">
-                    <ui:Label name="toolsStatusLabel" text="AI uses tools to achieve user's request. This is the main AI's instrument for doing everything.&#10;&#10;Active tools spend AI context. You want to keep the context consumption smaller, because AI works better when there is more free context. Consider disabling the tools you don't need." class="section-desc" />
-                </ui:Foldout>
+                <!-- Skills Sub-section -->
+                <ui:VisualElement name="SkillsSection" style="margin-top: 6px;">
+                    <ui:Label text="Skills" class="timeline-label" style="align-self: flex-start;" />
+                    <!-- Output Path row -->
+                    <ui:VisualElement style="flex-direction: row; align-items: center; margin-top: 4px; margin-bottom: 2px;">
+                        <ui:Label name="labelSkillsOutputPath" text="Output Path" class="section-desc" style="margin-bottom: 0; flex-shrink: 0;" />
+                        <ui:TextField name="inputSkillsRootFolder" style="flex-grow: 1; flex-shrink: 1; min-width: 0; margin-left: 47px;" />
+                    </ui:VisualElement>
+                    <!-- Auto-generate toggle + Generate button row -->
+                    <ui:VisualElement style="flex-direction: row; align-items: center; justify-content: space-between; margin-top: 2px;">
+                        <ui:VisualElement style="flex-direction: row; align-items: center;">
+                            <ui:Label text="Automatic generate" class="section-desc" style="margin-bottom: 0;" tooltip="Automatically regenerate skill files each time the Unity Editor reloads domain." />
+                            <ui:Toggle name="toggleAutoGenerateSkills" tooltip="Automatically regenerate skill files each time the Unity Editor reloads domain." style="margin-left: 4px;" />
+                        </ui:VisualElement>
+                        <ui:Button name="btnGenerateSkills" text="Generate" class="btn-compact" tooltip="Manually generate skill files." />
+                    </ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement class="divider" />
             <!-- Prompts Configuration Section -->
@@ -108,9 +122,6 @@
                     <ui:Label name="promptsCountLabel" text="0 / 0 prompts" class="header" />
                     <ui:Button name="btnOpenPrompts" text="Open" class="btn-secondary" />
                 </ui:VisualElement>
-                <ui:Foldout text="Information" value="false" class="base-foldout">
-                    <ui:Label name="promptsStatusLabel" text="Prompt is a command that user may use in MCP client. For example '/createGameObject'. The command may receive input arguments. The result of the command execution is the Prompt text message which injects into AI context and tells AI what to do.&#10;&#10;Prompt doesn't spent context memory. It only spends context when injected by a user action." class="section-desc" />
-                </ui:Foldout>
             </ui:VisualElement>
             <ui:VisualElement class="divider" />
             <!-- Resources Configuration Section -->
@@ -119,9 +130,6 @@
                     <ui:Label name="resourcesCountLabel" text="0 / 0 resources" class="header" />
                     <ui:Button name="btnOpenResources" text="Open" class="btn-secondary" />
                 </ui:VisualElement>
-                <ui:Foldout text="Information" value="false" class="base-foldout">
-                    <ui:Label name="resourcesStatusLabel" text="Resources provide read-only data that AI can access to understand your Unity project. They expose information like scene hierarchy, asset metadata, project settings, and more.&#10;&#10;Unlike tools which perform actions, resources give AI contextual awareness without modifying anything. Resources are fetched on-demand when AI needs specific information." class="section-desc" />
-                </ui:Foldout>
             </ui:VisualElement>
             <ui:VisualElement class="divider" />
             <!-- Support Section ============================== -->

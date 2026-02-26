@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using com.IvanMurzak.McpPlugin.Common.Model;
 using com.IvanMurzak.McpPlugin.Common.Utils;
+using com.IvanMurzak.McpPlugin.Skills;
 using com.IvanMurzak.ReflectorNet.Utils;
 using com.IvanMurzak.Unity.MCP.Editor.Utils;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -138,6 +139,29 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
             "About authorization tokens:\n" +
             Tooltip_AuthorizationTokenConcept;
 
+        private const string Tooltip_ToolsCountLabel =
+            "In MCP, a Tool is an executable function the AI agent can invoke to perform an action — " +
+            "creating GameObjects, modifying assets, running scripts, reading scene data, and more. " +
+            "Tools are the primary instrument through which the AI interacts with your Unity project.\n\n" +
+            "Every active tool contributes tokens to the AI's context window. A smaller context means " +
+            "the AI has more room to reason, producing better and more accurate results. " +
+            "Disable tools you don't use to keep context consumption low.";
+
+        private const string Tooltip_PromptsCountLabel =
+            "In MCP, a Prompt is a slash-command the user can invoke directly from the AI client " +
+            "(e.g. /setup-basic-scene). Each prompt can accept arguments, and when triggered it " +
+            "injects a pre-written instruction into the AI context, guiding the AI on what to do next.\n\n" +
+            "Prompts do not passively consume context tokens — they only use context at the moment " +
+            "a user explicitly invokes them.";
+
+        private const string Tooltip_ResourcesCountLabel =
+            "In MCP, a Resource is a named, read-only data provider the AI agent can query to " +
+            "understand your Unity project. Resources expose structured information such as scene " +
+            "hierarchy, asset metadata, and project settings without performing any actions or " +
+            "modifications.\n\n" +
+            "Resources are fetched on-demand when the AI needs specific project information. " +
+            "Unlike tools, they never modify any state.";
+
         private const string Tooltip_BtnGenerateToken =
             "Generate a new cryptographically secure random token.\n\n" +
             "Uses a cryptographic RNG to produce 32 bytes (256 bits) of randomness encoded as " +
@@ -166,6 +190,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
             SetupMcpServerSection(root);
             SetupAiAgentSection(root);
             SetupToolsSection(root);
+            SetupSkillsSection(root);
             SetupPromptsSection(root);
             SetupResourcesSection(root);
             ConfigureAgents(root);
@@ -847,6 +872,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                 if (manager == null)
                 {
                     label.text = "0 / 0 tools";
+                    label.tooltip = Tooltip_ToolsCountLabel + "\n\n0 enabled / 0 disabled / 0 total";
                     if (tokenLabel != null) tokenLabel.text = "~0 tokens total";
                     return;
                 }
@@ -854,8 +880,11 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                 void UpdateStats()
                 {
                     var all = manager.GetAllTools();
+                    var totalCount = all.Count();
                     var enabledCount = all.Count(t => manager.IsToolEnabled(t.Name));
-                    label.text = $"{enabledCount} / {all.Count()} tools";
+                    var disabledCount = totalCount - enabledCount;
+                    label.text = $"{enabledCount} / {totalCount} tools";
+                    label.tooltip = $"{Tooltip_ToolsCountLabel}\n\n{enabledCount} enabled / {disabledCount} disabled / {totalCount} total";
 
                     // Calculate total tokens for enabled tools
                     if (tokenLabel != null)
@@ -875,6 +904,55 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
             }).AddTo(_disposables);
         }
 
+        private void SetupSkillsSection(VisualElement root)
+        {
+            var labelPath = root.Q<Label>("labelSkillsOutputPath");
+            var inputPath = root.Q<TextField>("inputSkillsRootFolder");
+            var toggleAutoGenerate = root.Q<Toggle>("toggleAutoGenerateSkills");
+            var btnGenerate = root.Q<Button>("btnGenerateSkills");
+
+            if (inputPath == null || toggleAutoGenerate == null || btnGenerate == null)
+                return;
+
+            const string skillsOutputPathTooltip =
+                "Root folder path where skill markdown files will be generated. " +
+                "The recommended default location is \"SKILLS\". " +
+                "AI Game Developer will also create a nested folder named \"unity-editor\" inside it.";
+
+            if (labelPath != null) labelPath.tooltip = skillsOutputPathTooltip;
+            inputPath.tooltip = skillsOutputPathTooltip;
+
+            inputPath.SetValueWithoutNotify(UnityMcpPluginEditor.SkillsRootFolder);
+            toggleAutoGenerate.SetValueWithoutNotify(UnityMcpPluginEditor.GenerateSkillFiles);
+
+            inputPath.RegisterValueChangedCallback(evt =>
+            {
+                UnityMcpPluginEditor.SkillsRootFolder = evt.newValue;
+                UnityMcpPluginEditor.Instance.Save();
+            });
+
+            toggleAutoGenerate.RegisterValueChangedCallback(evt =>
+            {
+                UnityMcpPluginEditor.GenerateSkillFiles = evt.newValue;
+                UnityMcpPluginEditor.Instance.Save();
+            });
+
+            btnGenerate.RegisterCallback<ClickEvent>(evt =>
+            {
+                var tools = UnityMcpPluginEditor.Instance.Tools;
+                if (tools == null)
+                {
+                    Logger.LogWarning("Cannot generate skill files: Tools manager is not available.");
+                    return;
+                }
+                new SkillFileGenerator(UnityMcpPluginEditor.Instance.Logger).Generate(
+                    tools: tools.GetAllTools(),
+                    rootFolder: "unity-editor",
+                    basePath: UnityMcpPluginEditor.SkillsRootFolder
+                );
+            });
+        }
+
         private void SetupPromptsSection(VisualElement root)
         {
             var btn = root.Q<Button>("btnOpenPrompts");
@@ -887,12 +965,21 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                 .Subscribe(plugin =>
             {
                 var manager = plugin.McpManager.PromptManager;
-                if (manager == null) { label.text = "0 / 0 prompts"; return; }
+                if (manager == null)
+                {
+                    label.text = "0 / 0 prompts";
+                    label.tooltip = Tooltip_PromptsCountLabel + "\n\n0 enabled / 0 disabled / 0 total";
+                    return;
+                }
 
                 void UpdateStats()
                 {
                     var all = manager.GetAllPrompts();
-                    label.text = $"{all.Count(p => manager.IsPromptEnabled(p.Name))} / {all.Count()} prompts";
+                    var totalCount = all.Count();
+                    var enabledCount = all.Count(p => manager.IsPromptEnabled(p.Name));
+                    var disabledCount = totalCount - enabledCount;
+                    label.text = $"{enabledCount} / {totalCount} prompts";
+                    label.tooltip = $"{Tooltip_PromptsCountLabel}\n\n{enabledCount} enabled / {disabledCount} disabled / {totalCount} total";
                 }
                 UpdateStats();
 
@@ -915,12 +1002,21 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                 .Subscribe(plugin =>
             {
                 var manager = plugin.McpManager.ResourceManager;
-                if (manager == null) { label.text = "0 / 0 resources"; return; }
+                if (manager == null)
+                {
+                    label.text = "0 / 0 resources";
+                    label.tooltip = Tooltip_ResourcesCountLabel + "\n\n0 enabled / 0 disabled / 0 total";
+                    return;
+                }
 
                 void UpdateStats()
                 {
                     var all = manager.GetAllResources();
-                    label.text = $"{all.Count(r => manager.IsResourceEnabled(r.Name))} / {all.Count()} resources";
+                    var totalCount = all.Count();
+                    var enabledCount = all.Count(r => manager.IsResourceEnabled(r.Name));
+                    var disabledCount = totalCount - enabledCount;
+                    label.text = $"{enabledCount} / {totalCount} resources";
+                    label.tooltip = $"{Tooltip_ResourcesCountLabel}\n\n{enabledCount} enabled / {disabledCount} disabled / {totalCount} total";
                 }
                 UpdateStats();
 
