@@ -99,7 +99,7 @@
                 </ui:VisualElement>
                 <!-- Skills Sub-section -->
                 <ui:VisualElement name="SkillsSection" style="margin-top: 6px;">
-                    <ui:Label text="Skills" class="timeline-label" style="align-self: flex-start;" />
+                    <ui:Label text="SKILLS (procedural)" class="timeline-label" style="align-self: flex-start;" tooltip="Skills give the AI specialized procedural knowledge to handle complex tasks. They work by providing structured guides (Markdown files) that the AI reads to understand exactly how to execute workflows. This helps the AI act more autonomously and accurately without needing constant detailed prompts." />
                     <!-- Output Path row -->
                     <ui:VisualElement style="flex-direction: row; align-items: center; margin-top: 4px; margin-bottom: 2px;">
                         <ui:Label name="labelSkillsOutputPath" text="Output Path" class="section-desc" style="margin-bottom: 0; flex-shrink: 0;" />
