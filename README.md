@@ -46,105 +46,75 @@ Unlike other tools, this plugin works **inside your compiled game**, allowing fo
 ## Tools
 
 <details>
-  <summary>Assets</summary>
+  <summary>Project & Assets</summary>
 
-- `copy` - Copy the asset at path and stores it at newPath
-- `create-folder` - Creates a new folder in the specified parent folder
-- `delete` - Delete the assets at paths from the project
-- `find` - Search the asset database using the search filter string
-- `get-data` - Get asset data from the asset file including all serializable fields and properties
-- `modify` - Modify asset file in the project
-- `move` - Move the assets at paths in the project (also used for rename)
-- `refresh` - Refreshes the AssetDatabase
-- `create-material` - Create new material asset with default parameters
-- `list-all-shaders` - List all available shaders in the project assets and packages
-
-</details>
-
-<details>
-  <summary>Prefab</summary>
-
-- `prefab-create` - Create a prefab from a GameObject in the current active scene
-- `prefab-instantiate` - Instantiates prefab in the current active scene
-- `prefab-open` - Open prefab edit mode for a specific GameObject
-- `prefab-close` - Close currently opened prefab
-- `prefab-save` - Save a prefab in prefab editing mode
-
-</details>
-
-<details>
-  <summary>GameObject</summary>
-
-- `create` - Create a new GameObject in opened Prefab or in a Scene
-- `destroy` - Destroy GameObject and all nested GameObjects recursively
-- `duplicate` - Duplicate GameObjects in opened Prefab or in a Scene
-- `find` - Finds specific GameObject by provided information
-- `modify` - Modify GameObjects and/or attached component's fields and properties
-- `set-parent` - Set parent GameObject to list of GameObjects
+- `assets-copy` - Copy the asset at path and stores it at newPath
+- `assets-create-folder` - Creates a new folder in the specified parent folder
+- `assets-delete` - Delete the assets at paths from the project
+- `assets-find` - Search the asset database using the search filter string
+- `assets-find-built-in` - Search the built-in assets of the Unity Editor
+- `assets-get-data` - Get asset data from the asset file including all serializable fields and properties
+- `assets-material-create` - Create new material asset with default parameters
+- `assets-modify` - Modify asset file in the project
+- `assets-move` - Move the assets at paths in the project (also used for rename)
+- `assets-prefab-close` - Close currently opened prefab
+- `assets-prefab-create` - Create a prefab from a GameObject in the current active scene
+- `assets-prefab-instantiate` - Instantiates prefab in the current active scene
+- `assets-prefab-open` - Open prefab edit mode for a specific GameObject
+- `assets-prefab-save` - Save a prefab in prefab editing mode
+- `assets-refresh` - Refreshes the AssetDatabase
+- `assets-shader-list-all` - List all available shaders in the project assets and packages
+- `package-add` - Install a package from the Unity Package Manager registry, Git URL, or local path
+- `package-list` - List all packages installed in the Unity project (UPM packages)
+- `package-remove` - Remove (uninstall) a package from the Unity project
+- `package-search` - Search for packages in both Unity Package Manager registry and installed packages
 
 </details>
 
 <details>
-  <summary>Component</summary>
+  <summary>Scene & Hierarchy</summary>
 
-- `add` - Add Component to GameObject
-- `destroy` - Destroy one or many components from target GameObject
-- `get` - Get detailed information about a specific Component on a GameObject
-- `modify` - Modify a specific Component on a GameObject
-- `list` - List C# class names extended from UnityEngine.Component
+- `gameobject-component-add` - Add Component to GameObject
+- `gameobject-component-destroy` - Destroy one or many components from target GameObject
+- `gameobject-component-get` - Get detailed information about a specific Component on a GameObject
+- `gameobject-component-list-all` - List C# class names extended from UnityEngine.Component
+- `gameobject-component-modify` - Modify a specific Component on a GameObject
+- `gameobject-create` - Create a new GameObject in opened Prefab or in a Scene
+- `gameobject-destroy` - Destroy GameObject and all nested GameObjects recursively
+- `gameobject-duplicate` - Duplicate GameObjects in opened Prefab or in a Scene
+- `gameobject-find` - Finds specific GameObject by provided information
+- `gameobject-modify` - Modify GameObjects and/or attached component's fields and properties
+- `gameobject-set-parent` - Set parent GameObject to list of GameObjects
+- `object-get-data` - Get data of the specified Unity Object
+- `object-modify` - Modify the specified Unity Object
+- `scene-create` - Create new scene in the project assets
+- `scene-get-data` - Retrieves the list of root GameObjects in the specified scene
+- `scene-list-opened` - Returns the list of currently opened scenes in Unity Editor
+- `scene-open` - Open scene from the project asset file
+- `scene-save` - Save opened scene to the asset file
+- `scene-set-active` - Set the specified opened scene as the active scene
+- `scene-unload` - Unload scene from the opened scenes in Unity Editor
+- `screenshot-camera` - Captures a screenshot from a camera and returns it as an image
+- `screenshot-game-view` - Captures a screenshot from the Unity Editor Game View
+- `screenshot-scene-view` - Captures a screenshot from the Unity Editor Scene View
 
 </details>
 
 <details>
-  <summary>Scene</summary>
+  <summary>Scripting & Editor</summary>
 
-- `create` - Create new scene in the project assets
-- `get-data` - Retrieves the list of root GameObjects in the specified scene
-- `list-opened` - Returns the list of currently opened scenes in Unity Editor
-- `open` - Open scene from the project asset file
-- `save` - Save opened scene to the asset file
-- `set-active` - Set the specified opened scene as the active scene
-- `unload` - Unload scene from the opened scenes in Unity Editor
-
-</details>
-
-<details>
-  <summary>Coding</summary>
-
-- `tests-run` - Execute Unity tests (EditMode/PlayMode) with filtering and detailed results
+- `console-get-logs` - Retrieves Unity Editor logs with filtering options
+- `editor-application-get-state` - Returns information about the Unity Editor application state (playmode, paused, compilation)
+- `editor-application-set-state` - Control the Unity Editor application state (start/stop/pause playmode)
+- `editor-selection-get` - Get information about the current Selection in the Unity Editor
+- `editor-selection-set` - Set the current Selection in the Unity Editor
+- `reflection-method-call` - Call any C# method with input parameters and return results
+- `reflection-method-find` - Find method in the project using C# Reflection (even private methods)
+- `script-delete` - Delete the script file(s)
 - `script-execute` - Compiles and executes C# code dynamically using Roslyn
 - `script-read` - Reads the content of a script file
 - `script-update-or-create` - Updates or creates script file with the provided C# code
-- `script-delete` - Delete the script file(s)
-
-</details>
-
-<details>
-  <summary>Editor</summary>
-
-- `get-state` - Returns information about the Unity Editor application state (playmode, paused, compilation)
-- `set-state` - Control the Unity Editor application state (start/stop/pause playmode)
-- `selection-get` - Get information about the current Selection in the Unity Editor
-- `selection-set` - Set the current Selection in the Unity Editor
-
-</details>
-
-<details>
-  <summary>Package Manager</summary>
-
-- `add` - Install a package from the Unity Package Manager registry, Git URL, or local path
-- `remove` - Remove (uninstall) a package from the Unity project
-- `list` - List all packages installed in the Unity project (UPM packages)
-- `search` - Search for packages in both Unity Package Manager registry and installed packages
-
-</details>
-
-<details>
-  <summary>Other</summary>
-
-- `get-logs` - Retrieves Unity Editor logs with filtering options
-- `reflection-method-find` - Find method in the project using C# Reflection (even private methods)
-- `reflection-method-call` - Call any C# method with input parameters and return results
+- `tests-run` - Execute Unity tests (EditMode/PlayMode) with filtering and detailed results
 
 </details>
 
