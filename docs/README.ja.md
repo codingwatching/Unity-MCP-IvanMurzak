@@ -27,13 +27,14 @@
 
 ## 機能
 
-- ✔️ **ランタイムAI** - コンパイル済みゲーム内でLLMを直接使用し、動的NPCの動作やデバッグを実現
-- ✔️ **自然な会話** - 人間と話すようにAIとチャット
-- ✔️ **コードアシスタンス** - AIにコードの作成とテストの実行を依頼
+- ✔️ **AIエージェント** - **Anthropic**、**OpenAI**、**Microsoft**、または他のプロバイダーの最高のエージェントを制限なく使用
+- ✔️ **ツール** - Unity Editorで操作するための幅広いデフォルト[MCPツール](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/default-mcp-tools.md)
+- ✔️ **スキル** - 各MCPツールのスキルを自動生成し、MCPツール登録にトークンを浪費せずにツールを使用可能
+- ✔️ **コードとテスト** - AIにコードの作成とテストの実行を依頼
+- ✔️ **ランタイム（ゲーム内）** - コンパイル済みゲーム内でLLMを直接使用し、動的NPCの動作やデバッグを実現
 - ✔️ **デバッグサポート** - AIにログの取得とエラーの修正を依頼
-- ✔️ **複数のLLMプロバイダー** - **Anthropic**、**OpenAI**、**DeepSeek**、Microsoft、または他のプロバイダーのエージェントを制限なく使用
+- ✔️ **自然な会話** - 人間と話すようにAIとチャット
 - ✔️ **柔軟なデプロイメント** - 設定によりローカル（stdio）およびリモート（http）で動作
-- ✔️ **豊富なツールセット** - 幅広いデフォルト[MCPツール](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/default-mcp-tools.md)
 - ✔️ **拡張可能** - プロジェクトコードで[カスタムMCPツール](#カスタムmcpツールの追加)を作成
 
 [![インストーラーをダウンロード](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/button/button_download_ja.svg?raw=true)](https://github.com/IvanMurzak/Unity-MCP/releases/download/0.50.0/AI-Game-Dev-Installer.unitypackage)

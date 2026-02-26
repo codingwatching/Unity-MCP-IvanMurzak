@@ -27,13 +27,14 @@ A diferencia de otras herramientas, este plugin funciona **dentro de tu juego co
 
 ## Características
 
-- ✔️ **IA en Runtime** - Usa LLMs directamente dentro de tu juego compilado para comportamiento dinámico de NPCs o depuración
-- ✔️ **Conversación natural** - Chatea con la IA como lo harías con un humano
-- ✔️ **Asistencia de código** - Pídele a la IA que escriba código y ejecute pruebas
+- ✔️ **Agentes IA** - Usa los mejores agentes de **Anthropic**, **OpenAI**, **Microsoft** o cualquier otro proveedor sin límites
+- ✔️ **HERRAMIENTAS** - Amplio rango de [Herramientas MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/default-mcp-tools.md) por defecto para operar en Unity Editor
+- ✔️ **HABILIDADES** - Genera automáticamente habilidades para cada herramienta MCP, permitiéndote usar herramientas sin desperdiciar tokens en el registro de herramientas MCP
+- ✔️ **Código y pruebas** - Pídele a la IA que escriba código y ejecute pruebas
+- ✔️ **Runtime (en juego)** - Usa LLMs directamente dentro de tu juego compilado para comportamiento dinámico de NPCs o depuración
 - ✔️ **Soporte de depuración** - Pídele a la IA que obtenga registros y corrija errores
-- ✔️ **Múltiples proveedores de LLM** - Usa agentes de **Anthropic**, **OpenAI**, **DeepSeek**, Microsoft o cualquier otro proveedor sin límites
+- ✔️ **Conversación natural** - Chatea con la IA como lo harías con un humano
 - ✔️ **Despliegue flexible** - Funciona localmente (stdio) y remotamente (http) por configuración
-- ✔️ **Conjunto de herramientas rico** - Amplio rango de [Herramientas MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/default-mcp-tools.md) por defecto
 - ✔️ **Extensible** - Crea [herramientas MCP personalizadas en el código de tu proyecto](#agregar-herramienta-mcp-personalizada)
 
 [![DESCARGAR INSTALADOR](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/button/button_download_es.svg?raw=true)](https://github.com/IvanMurzak/Unity-MCP/releases/download/0.50.0/AI-Game-Dev-Installer.unitypackage)

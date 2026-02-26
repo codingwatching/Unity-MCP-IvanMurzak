@@ -27,13 +27,14 @@ Unlike other tools, this plugin works **inside your compiled game**, allowing fo
 
 ## Features
 
-- ✔️ **Runtime AI** - Use LLMs directly inside your compiled game for dynamic NPC behavior or debugging
-- ✔️ **Natural conversation** - Chat with AI like you would with a human
-- ✔️ **Code assistance** - Ask AI to write code and run tests
+- ✔️ **AI agents** - Use the best agents from **Anthropic**, **OpenAI**, **Microsoft**, or any other provider with no limits
+- ✔️ **TOOLS** - A wide range of default [MCP Tools](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/default-mcp-tools.md) for operating in Unity Editor
+- ✔️ **SKILLS** - Automatically generates skills for each MCP tool, allowing you to use tools without wasting tokens on MCP tool registration
+- ✔️ **Code and Tests** - Ask AI to write code and run tests
+- ✔️ **Runtime (in-game)** - Use LLMs directly inside your compiled game for dynamic NPC behavior or debugging
 - ✔️ **Debug support** - Ask AI to get logs and fix errors
-- ✔️ **Multiple LLM providers** - Use agents from **Anthropic**, **OpenAI**, **DeepSeek**, Microsoft, or any other provider with no limits
-- ✔️ **Flexible deployment** - Works locally (stdio) and remotely (http) by configuration
-- ✔️ **Rich toolset** - Wide range of default [MCP Tools](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/default-mcp-tools.md)
+- ✔️ **Natural conversation** - Chat with AI like you would with a human
+- ✔️ **Flexible deployment** - Works locally (stdio) and remotely (http) via configuration
 - ✔️ **Extensible** - Create [custom MCP Tools in your project code](#add-custom-mcp-tool)
 
 [![DOWNLOAD INSTALLER](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/button/button_download.svg?raw=true)](https://github.com/IvanMurzak/Unity-MCP/releases/download/0.50.0/AI-Game-Dev-Installer.unitypackage)
