@@ -12,6 +12,7 @@
 #if UNITY_EDITOR
 using System.IO;
 using System.Threading.Tasks;
+using com.IvanMurzak.McpPlugin.Skills;
 using com.IvanMurzak.Unity.MCP.Editor.Utils;
 using UnityEditor;
 using UnityEngine;
@@ -23,6 +24,13 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
     {
         [MenuItem("Window/AI Game Developer — MCP %&a", priority = 1006)]
         public static void ShowWindow() => MainWindowEditor.ShowWindow();
+
+        [MenuItem("Tools/AI Game Developer/Create Skills", priority = 1005)]
+        public static void CreateSkills() => new SkillFileGenerator(UnityMcpPluginEditor.Instance.Logger).Generate(
+            tools: UnityMcpPluginEditor.Instance.Tools!.GetAllTools(),
+            rootFolder: "unity-editor",
+            basePath: "SKILLS"
+        );
 
         [MenuItem("Tools/AI Game Developer/Check for Updates", priority = 999)]
         public static void CheckForUpdates() => _ = UpdateChecker.CheckForUpdatesAsync(forceCheck: true);
