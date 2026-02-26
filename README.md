@@ -45,8 +45,6 @@ Unlike other tools, this plugin works **inside your compiled game**, allowing fo
 
 ## Tools
 
-### Assets
-
 <details>
   <summary>Assets</summary>
 
