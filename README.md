@@ -25,11 +25,11 @@ Unlike other tools, this plugin works **inside your compiled game**, allowing fo
 
 > **[💬 Join our Discord Server](https://discord.gg/cfbdMZX99G)** - Ask questions, showcase your work, and connect with other developers!
 
-## Features
+## ![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-features.svg?raw=true)
 
 - ✔️ **AI agents** - Use the best agents from **Anthropic**, **OpenAI**, **Microsoft**, or any other provider with no limits
 - ✔️ **TOOLS** - A wide range of default [MCP Tools](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/default-mcp-tools.md) for operating in Unity Editor
-- ✔️ **SKILLS** - Automatically generates skills for each MCP tool, allowing you to use tools without wasting tokens on MCP tool registration
+- ✔️ **SKILLS** - Automatically generates skills for each MCP tool
 - ✔️ **Code and Tests** - Ask AI to write code and run tests
 - ✔️ **Runtime (in-game)** - Use LLMs directly inside your compiled game for dynamic NPC behavior or debugging
 - ✔️ **Debug support** - Ask AI to get logs and fix errors
@@ -41,7 +41,11 @@ Unlike other tools, this plugin works **inside your compiled game**, allowing fo
 
 ![AI Game Developer Windows](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/editor/ai-game-developer-windows.png?raw=true)
 
-### Tools
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+
+## Tools
+
+### Assets
 
 <details>
   <summary>Assets</summary>
@@ -54,31 +58,19 @@ Unlike other tools, this plugin works **inside your compiled game**, allowing fo
 - `modify` - Modify asset file in the project
 - `move` - Move the assets at paths in the project (also used for rename)
 - `refresh` - Refreshes the AssetDatabase
+- `create-material` - Create new material asset with default parameters
+- `list-all-shaders` - List all available shaders in the project assets and packages
 
 </details>
 
 <details>
-  <summary>Assets / Material</summary>
+  <summary>Prefab</summary>
 
-- `create` - Create new material asset with default parameters
-
-</details>
-
-<details>
-  <summary>Assets / Shader</summary>
-
-- `list-all` - List all available shaders in the project assets and packages
-
-</details>
-
-<details>
-  <summary>Assets / Prefab</summary>
-
-- `create` - Create a prefab from a GameObject in the current active scene
-- `instantiate` - Instantiates prefab in the current active scene
-- `open` - Open prefab edit mode for a specific GameObject
-- `close` - Close currently opened prefab
-- `save` - Save a prefab in prefab editing mode
+- `prefab-create` - Create a prefab from a GameObject in the current active scene
+- `prefab-instantiate` - Instantiates prefab in the current active scene
+- `prefab-open` - Open prefab edit mode for a specific GameObject
+- `prefab-close` - Close currently opened prefab
+- `prefab-save` - Save a prefab in prefab editing mode
 
 </details>
 
@@ -95,18 +87,12 @@ Unlike other tools, this plugin works **inside your compiled game**, allowing fo
 </details>
 
 <details>
-  <summary>GameObject / Component</summary>
+  <summary>Component</summary>
 
 - `add` - Add Component to GameObject
 - `destroy` - Destroy one or many components from target GameObject
 - `get` - Get detailed information about a specific Component on a GameObject
 - `modify` - Modify a specific Component on a GameObject
-
-</details>
-
-<details>
-  <summary>Component</summary>
-
 - `list` - List C# class names extended from UnityEngine.Component
 
 </details>
@@ -125,50 +111,23 @@ Unlike other tools, this plugin works **inside your compiled game**, allowing fo
 </details>
 
 <details>
-  <summary>Script</summary>
+  <summary>Coding</summary>
 
-- `delete` - Delete the script file(s)
-- `execute` - Compiles and executes C# code dynamically using Roslyn
-- `read` - Reads the content of a script file
-- `update-or-create` - Updates or creates script file with the provided C# code
-
-</details>
-
-<details>
-  <summary>Console</summary>
-
-- `get-logs` - Retrieves Unity Editor logs with filtering options
+- `tests-run` - Execute Unity tests (EditMode/PlayMode) with filtering and detailed results
+- `script-execute` - Compiles and executes C# code dynamically using Roslyn
+- `script-read` - Reads the content of a script file
+- `script-update-or-create` - Updates or creates script file with the provided C# code
+- `script-delete` - Delete the script file(s)
 
 </details>
 
 <details>
-  <summary>Editor / Application</summary>
+  <summary>Editor</summary>
 
 - `get-state` - Returns information about the Unity Editor application state (playmode, paused, compilation)
 - `set-state` - Control the Unity Editor application state (start/stop/pause playmode)
-
-</details>
-
-<details>
-  <summary>Editor / Selection</summary>
-
-- `get` - Get information about the current Selection in the Unity Editor
-- `set` - Set the current Selection in the Unity Editor
-
-</details>
-
-<details>
-  <summary>Reflection</summary>
-
-- `method-find` - Find method in the project using C# Reflection (even private methods)
-- `method-call` - Call any C# method with input parameters and return results
-
-</details>
-
-<details>
-  <summary>Tests</summary>
-
-- `run` - Execute Unity tests (EditMode/PlayMode) with filtering and detailed results
+- `selection-get` - Get information about the current Selection in the Unity Editor
+- `selection-set` - Set the current Selection in the Unity Editor
 
 </details>
 
@@ -182,13 +141,22 @@ Unlike other tools, this plugin works **inside your compiled game**, allowing fo
 
 </details>
 
+<details>
+  <summary>Other</summary>
+
+- `get-logs` - Retrieves Unity Editor logs with filtering options
+- `reflection-method-find` - Find method in the project using C# Reflection (even private methods)
+- `reflection-method-call` - Call any C# method with input parameters and return results
+
+</details>
+
 #### Additional tools
 
 - [Animation](https://github.com/IvanMurzak/Unity-AI-Animation/)
 - [ParticleSystem](https://github.com/IvanMurzak/Unity-AI-ParticleSystem/)
 - [ProBuilder](https://github.com/IvanMurzak/Unity-AI-ProBuilder/)
 
-### Stability status
+## Stability status
 
 | Unity Version | Editmode                                                                                                                                                                               | Playmode                                                                                                                                                                               | Standalone                                                                                                                                                                               |
 | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -196,8 +164,11 @@ Unlike other tools, this plugin works **inside your compiled game**, allowing fo
 | 2023.2.22f1   | [![r](https://github.com/IvanMurzak/Unity-MCP/workflows/release/badge.svg?job=test-unity-2023-2-22f1-editmode)](https://github.com/IvanMurzak/Unity-MCP/actions/workflows/release.yml) | [![r](https://github.com/IvanMurzak/Unity-MCP/workflows/release/badge.svg?job=test-unity-2023-2-22f1-playmode)](https://github.com/IvanMurzak/Unity-MCP/actions/workflows/release.yml) | [![r](https://github.com/IvanMurzak/Unity-MCP/workflows/release/badge.svg?job=test-unity-2023-2-22f1-standalone)](https://github.com/IvanMurzak/Unity-MCP/actions/workflows/release.yml) |
 | 6000.3.1f1    | [![r](https://github.com/IvanMurzak/Unity-MCP/workflows/release/badge.svg?job=test-unity-6000-3-1f1-editmode)](https://github.com/IvanMurzak/Unity-MCP/actions/workflows/release.yml)  | [![r](https://github.com/IvanMurzak/Unity-MCP/workflows/release/badge.svg?job=test-unity-6000-3-1f1-playmode)](https://github.com/IvanMurzak/Unity-MCP/actions/workflows/release.yml)  | [![r](https://github.com/IvanMurzak/Unity-MCP/workflows/release/badge.svg?job=test-unity-6000-3-1f1-standalone)](https://github.com/IvanMurzak/Unity-MCP/actions/workflows/release.yml)  |
 
-## Content
+---
 
+# Content
+
+- [Content](#content)
 - [Installation](#installation)
   - [Step 1: Install `Unity MCP Plugin`](#step-1-install-unity-mcp-plugin)
     - [Option 1 - Installer](#option-1---installer)
@@ -235,6 +206,8 @@ Unlike other tools, this plugin works **inside your compiled game**, allowing fo
   - [What is `MCP Prompt`](#what-is-mcp-prompt)
     - [When to use `MCP Prompt`](#when-to-use-mcp-prompt)
 - [Contribution 💙💛](#contribution-)
+
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # Installation
 
@@ -359,7 +332,7 @@ If automatic configuration doesn't work for you for any reason, use the JSON fro
   > Replace `<command>` from the table above
 </details>
 
----
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # AI Workflow Examples: Claude & Gemini
 
@@ -405,7 +378,7 @@ Unity MCP provides advanced tools that enable the LLM to work faster and more ef
 - ✔️ **Live Unity API** - Unity API instantly available - even when Unity changes, you get the fresh API
 - ✔️ **Self-documenting** - Access human-readable descriptions of any `class`, `method`, or `property` via `Description` attributes
 
----
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # Customize MCP
 
@@ -467,7 +440,7 @@ public static class Prompt_ScriptingCode
 }
 ```
 
----
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # Runtime usage (in-game)
 
@@ -520,7 +493,7 @@ public static class ChessGameAI
 
 There are many use cases, lets imagine you are working on a Chess game with bot. You may outsource the bot decision making to LLM by writing few lines of code.
 
----
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # Unity `MCP Server` setup
 
@@ -651,7 +624,7 @@ You may launch Unity `MCP Server` directly from a binary file. You would need to
 
 </details>
 
----
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # How Unity MCP Architecture Works
 
@@ -754,7 +727,7 @@ It is a bridge between `MCP Client` and "something else", in this particular cas
 - "Performance is critical - prefer object pooling for frequently instantiated objects"
 - "This project follows SOLID principles - explain any architecture decisions"
 
----
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # Contribution 💙💛
 

@@ -26,11 +26,11 @@
       }
 
       .hazard-bg {
-        fill: #FFDC0000;
+        fill: transparent;
       }
 
       .hazard-stripe {
-        fill: #FF000080;
+        fill: #FFDC00;
       }
 
       .ai-text {
@@ -86,9 +86,9 @@
   </g>
 
   <!-- Text with shadow -->
-  <a href="https://github.com/IvanMurzak/Unity-MCP#contribution" target="_blank">
+  <a href="https://github.com/IvanMurzak/Unity-MCP#features" target="_blank">
     <text x="592" y="32" class="text-main">
-      <tspan class="main-text">Contribution💙💛</tspan>
+      <tspan class="main-text">Características</tspan>
     </text>
   </a>
 </svg>

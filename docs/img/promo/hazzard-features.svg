@@ -26,11 +26,11 @@
       }
 
       .hazard-bg {
-        fill: #FFDC0000;
+        fill: transparent;
       }
 
       .hazard-stripe {
-        fill: #FF000080;
+        fill: #FFDC00;
       }
 
       .ai-text {
