@@ -12,7 +12,7 @@
     <filter id="textShadow" x="-50%" y="-50%" width="200%" height="200%">
       <feDropShadow dx="3" dy="3" stdDeviation="5" class="shadow-color" flood-opacity="0.9"/>
     </filter>
-    
+
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;display=swap');
 
@@ -88,13 +88,12 @@
         repeatCount="indefinite"/>
     </rect>
   </g>
-  
+
   <!-- Text with shadow -->
-  <a href="https://github.com/IvanMurzak/Unity-MCP#installation" target="_blank">
   <a href="https://github.com/IvanMurzak/Unity-MCP" target="_blank">
     <text x="592" y="32" class="text-main">
       <tspan class="main-text">Installation</tspan>
     </text>
   </a>
-  </a>
+
 </svg>
