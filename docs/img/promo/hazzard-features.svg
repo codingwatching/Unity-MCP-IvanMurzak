@@ -87,8 +87,10 @@
   
   <!-- Text with shadow -->
   <a href="https://github.com/IvanMurzak/Unity-MCP#features" target="_blank">
+  <a href="https://github.com/IvanMurzak/Unity-MCP" target="_blank">
     <text x="592" y="32" class="text-main">
       <tspan class="main-text">Features</tspan>
     </text>
+  </a>
   </a>
 </svg>

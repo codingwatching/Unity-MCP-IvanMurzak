@@ -61,15 +61,17 @@
   </defs>
   
   <!-- Animated hazard background -->
-  <g clip-path="url(#viewportClip)">
-    <rect x="-240" y="0" width="1664" height="40" fill="url(#hazardStripes)">
-      <animateTransform
-        attributeName="transform"
-        type="translate"
-        from="0 0"
-        to="120 0"
-        dur="5s"
-        repeatCount="indefinite"/>
-    </rect>
-  </g>
+  <a href="https://github.com/IvanMurzak/Unity-MCP" target="_blank">
+    <g clip-path="url(#viewportClip)">
+      <rect x="-240" y="0" width="1664" height="40" fill="url(#hazardStripes)">
+        <animateTransform
+          attributeName="transform"
+          type="translate"
+          from="0 0"
+          to="120 0"
+          dur="5s"
+          repeatCount="indefinite"/>
+      </rect>
+    </g>
+  </a>
 </svg>
