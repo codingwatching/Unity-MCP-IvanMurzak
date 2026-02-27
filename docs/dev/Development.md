@@ -367,8 +367,8 @@ This project follows consistent C# coding patterns. All new code must adhere to 
 3. **Attributes**: Leverage `[McpPluginTool]`, `[McpPluginPrompt]`, `[McpPluginResource]` for MCP discovery
 4. **Partial Classes**: Split functionality across files (e.g., `Tool_GameObject.Create.cs`, `Tool_GameObject.Destroy.cs`)
 5. **Main Thread Execution**: Wrap all Unity API calls with `MainThread.Instance.Run()`
-6. **Error Handling**: Centralize error messages in nested `Error` classes within the tool class
-7. **Return Format**: Use `[Success]` or `[Error]` prefixes in all return strings for structured AI feedback
+6. **Error Handling**: Throw exceptions for errors — use `ArgumentException` or `Exception`, never return error strings
+7. **Return Types**: Return typed data models annotated with `[Description]` for structured AI feedback
 8. **Descriptions**: Annotate all public APIs and parameters with `[Description]` for AI guidance
 9. **Naming**: PascalCase for public members and types, `_camelCase` for private readonly fields
 10. **Null Safety**: Use nullable types (`?`) and null-coalescing operators (`??`, `??=`)
@@ -396,9 +396,9 @@ using UnityEditor;
 
 using System;
 using System.ComponentModel;
-using System.Threading.Tasks;
-using com.IvanMurzak.Unity.MCP.Common;
-using com.IvanMurzak.Unity.MCP.Utils;
+using com.IvanMurzak.McpPlugin;
+using com.IvanMurzak.Unity.MCP.Runtime.Data;
+using com.IvanMurzak.Unity.MCP.Runtime.Utils;
 using UnityEngine;
 
 namespace com.IvanMurzak.Unity.MCP.Editor.API
@@ -409,26 +409,15 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
     // Pattern: One file per operation (e.g., GameObject.Create.cs, GameObject.Destroy.cs)
     public partial class Tool_GameObject
     {
-        // Nested Error class centralizes error messages for maintainability
-        public static class Error
-        {
-            // Static methods for consistent error formatting
-            public static string GameObjectNameIsEmpty()
-                => "GameObject name is empty. Please provide a valid name.";
-
-            public static string NotFoundGameObjectAtPath(string path)
-                => $"GameObject '{path}' not found.";
-        }
-
         // MCP Tool declaration with attribute-based metadata
         [McpPluginTool(
-            "GameObject_Create",                    // Unique tool identifier
-            Title = "Create a new GameObject"       // Human-readable title
+            "gameobject-create",                    // Unique tool identifier (kebab-case)
+            Title = "GameObject / Create"           // Human-readable title
         )]
         // Description attribute guides AI on when/how to use this tool
         [Description(@"Create a new GameObject in the scene.
 Provide position, rotation, and scale to minimize subsequent operations.")]
-        public string Create
+        public CreateResult Create                   // Return a typed data model, not a string
         (
             // Parameter descriptions help AI understand expected inputs
             [Description("Name of the new GameObject.")]
@@ -447,32 +436,32 @@ Provide position, rotation, and scale to minimize subsequent operations.")]
             Vector3? scale = null
         )
         {
-            // any logic in background thread
-            // ...
+            // Validate before entering the main thread — throw exceptions for errors
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentException("Name cannot be null or empty.", nameof(name));
 
             return MainThread.Instance.Run(() =>           // All Unity API calls MUST run on main thread
             {
-                // Validate input parameters early
-                if (string.IsNullOrEmpty(name))
-                    return Error.GameObjectNameIsEmpty();
-
                 // Null-coalescing assignment for default values
                 position ??= Vector3.zero;
                 rotation ??= Vector3.zero;
                 scale ??= Vector3.one;
 
+                // Resolve optional parent — throw on bad reference, don't return error strings
+                var parentGo = default(GameObject);
+                if (parentGameObjectRef?.IsValid(out _) == true)
+                {
+                    parentGo = parentGameObjectRef.FindGameObject(out var error);
+                    if (error != null)
+                        throw new ArgumentException(error, nameof(parentGameObjectRef));
+                }
+
                 // Create GameObject using Unity API
                 var go = new GameObject(name);
 
                 // Set parent if provided
-                if (parentGameObjectRef?.IsValid ?? false)
-                {
-                    var parentGo = parentGameObjectRef.FindGameObject(out var error);
-                    if (error != null)
-                        return $"{error}";
-
+                if (parentGo != null)
                     go.transform.SetParent(parentGo.transform, worldPositionStays: false);
-                }
 
                 // Apply transform values
                 go.transform.localPosition = position.Value;
@@ -482,33 +471,27 @@ Provide position, rotation, and scale to minimize subsequent operations.")]
                 // Mark as modified for Unity Editor
                 EditorUtility.SetDirty(go);
 
-                // Return success message with structured data
-                // Use string interpolation for readable formatting
-                return $"[Success] Created GameObject.\ninstanceID: {go.GetInstanceID()}, path: {go.GetPath()}";
+                // Return a typed result — properties annotated with [Description] for AI
+                return new CreateResult
+                {
+                    InstanceId = go.GetInstanceID(),
+                    Path       = go.GetPath(),
+                    Name       = go.name,
+                };
             });
         }
 
-        // Async method example with proper error handling
-        public static async Task<string> AsyncOperation(string parameter)
+        // Typed result class — structured data returned to the AI client
+        public class CreateResult
         {
-            try
-            {
-                // Background work can happen here
-                await Task.Delay(100);
+            [Description("Instance ID of the created GameObject.")]
+            public int InstanceId { get; set; }
 
-                // Switch to main thread for Unity API calls
-                return await MainThread.Instance.RunAsync(() =>
-                {
-                    // Unity API calls here
-                    return "[Success] Async operation completed.";
-                });
-            }
-            catch (Exception ex)
-            {
-                // Log exceptions with structured logging
-                Debug.LogException(ex);
-                return $"[Error] Operation failed: {ex.Message}";
-            }
+            [Description("Hierarchy path of the created GameObject.")]
+            public string? Path { get; set; }
+
+            [Description("Name of the created GameObject.")]
+            public string? Name { get; set; }
         }
     }
 

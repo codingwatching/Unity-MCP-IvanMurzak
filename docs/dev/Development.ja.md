@@ -366,8 +366,8 @@ graph LR
 3. **属性**: MCP 検出のために `[McpPluginTool]`、`[McpPluginPrompt]`、`[McpPluginResource]` を活用する
 4. **部分クラス**: 機能をファイル間に分割する（例: `Tool_GameObject.Create.cs`、`Tool_GameObject.Destroy.cs`）
 5. **メインスレッド実行**: すべての Unity API 呼び出しを `MainThread.Instance.Run()` でラップする
-6. **エラーハンドリング**: ツールクラス内にネストされた `Error` クラスでエラーメッセージを集約する
-7. **戻り値の形式**: 構造化された AI フィードバックのためにすべての戻り文字列に `[Success]` または `[Error]` プレフィックスを使用する
+6. **エラーハンドリング**: 例外をスローしてエラーを処理する — `ArgumentException` または `Exception` を使用し、エラー文字列を返さない
+7. **戻り値の型**: `[Description]` で注釈された型付きデータモデルを返し、構造化された AI フィードバックを提供する
 8. **説明**: AI ガイダンスのためにすべてのパブリック API とパラメーターに `[Description]` を付与する
 9. **命名規則**: パブリックメンバーと型には PascalCase、プライベート readonly フィールドには `_camelCase`
 10. **null 安全性**: nullable 型（`?`）と null 合体演算子（`??`、`??=`）を使用する
@@ -395,9 +395,9 @@ using UnityEditor;
 
 using System;
 using System.ComponentModel;
-using System.Threading.Tasks;
-using com.IvanMurzak.Unity.MCP.Common;
-using com.IvanMurzak.Unity.MCP.Utils;
+using com.IvanMurzak.McpPlugin;
+using com.IvanMurzak.Unity.MCP.Runtime.Data;
+using com.IvanMurzak.Unity.MCP.Runtime.Utils;
 using UnityEngine;
 
 namespace com.IvanMurzak.Unity.MCP.Editor.API
@@ -408,26 +408,15 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
     // パターン: 操作ごとに1ファイル（例: GameObject.Create.cs、GameObject.Destroy.cs）
     public partial class Tool_GameObject
     {
-        // ネストされた Error クラスでエラーメッセージを一元管理
-        public static class Error
-        {
-            // 一貫したエラーフォーマットのための静的メソッド
-            public static string GameObjectNameIsEmpty()
-                => "GameObject name is empty. Please provide a valid name.";
-
-            public static string NotFoundGameObjectAtPath(string path)
-                => $"GameObject '{path}' not found.";
-        }
-
         // 属性ベースのメタデータを持つ MCP Tool の宣言
         [McpPluginTool(
-            "GameObject_Create",                    // 一意のツール識別子
-            Title = "Create a new GameObject"       // 人が読めるタイトル
+            "gameobject-create",                    // 一意のツール識別子（ケバブケース）
+            Title = "GameObject / Create"           // 人が読めるタイトル
         )]
         // Description 属性は AI にこのツールをいつ/どのように使うかを案内します
         [Description(@"Create a new GameObject in the scene.
 Provide position, rotation, and scale to minimize subsequent operations.")]
-        public string Create
+        public CreateResult Create                   // 文字列ではなく型付きデータモデルを返す
         (
             // パラメーターの説明は AI が期待される入力を理解するのを助けます
             [Description("Name of the new GameObject.")]
@@ -446,32 +435,32 @@ Provide position, rotation, and scale to minimize subsequent operations.")]
             Vector3? scale = null
         )
         {
-            // バックグラウンドスレッドで任意のロジックを実行
-            // ...
+            // メインスレッドに入る前に検証 — エラーは例外としてスロー
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentException("Name cannot be null or empty.", nameof(name));
 
             return MainThread.Instance.Run(() =>           // すべての Unity API 呼び出しはメインスレッドで実行する必要があります
             {
-                // 入力パラメーターを早期に検証
-                if (string.IsNullOrEmpty(name))
-                    return Error.GameObjectNameIsEmpty();
-
                 // デフォルト値のための null 合体代入
                 position ??= Vector3.zero;
                 rotation ??= Vector3.zero;
                 scale ??= Vector3.one;
 
+                // オプションの親を解決 — エラー時は例外をスロー、エラー文字列を返さない
+                var parentGo = default(GameObject);
+                if (parentGameObjectRef?.IsValid(out _) == true)
+                {
+                    parentGo = parentGameObjectRef.FindGameObject(out var error);
+                    if (error != null)
+                        throw new ArgumentException(error, nameof(parentGameObjectRef));
+                }
+
                 // Unity API を使用して GameObject を作成
                 var go = new GameObject(name);
 
                 // 提供されている場合は親を設定
-                if (parentGameObjectRef?.IsValid ?? false)
-                {
-                    var parentGo = parentGameObjectRef.FindGameObject(out var error);
-                    if (error != null)
-                        return $"{error}";
-
+                if (parentGo != null)
                     go.transform.SetParent(parentGo.transform, worldPositionStays: false);
-                }
 
                 // トランスフォームの値を適用
                 go.transform.localPosition = position.Value;
@@ -481,33 +470,27 @@ Provide position, rotation, and scale to minimize subsequent operations.")]
                 // Unity Editor の変更としてマーク
                 EditorUtility.SetDirty(go);
 
-                // 構造化されたデータを含む成功メッセージを返す
-                // 読みやすいフォーマットのために文字列補間を使用
-                return $"[Success] Created GameObject.\ninstanceID: {go.GetInstanceID()}, path: {go.GetPath()}";
+                // 型付き結果を返す — プロパティは AI 向けに [Description] で注釈付け
+                return new CreateResult
+                {
+                    InstanceId = go.GetInstanceID(),
+                    Path       = go.GetPath(),
+                    Name       = go.name,
+                };
             });
         }
 
-        // 適切なエラーハンドリングを持つ非同期メソッドの例
-        public static async Task<string> AsyncOperation(string parameter)
+        // 型付き結果クラス — AI クライアントに返す構造化データ
+        public class CreateResult
         {
-            try
-            {
-                // バックグラウンド処理はここで行えます
-                await Task.Delay(100);
+            [Description("Instance ID of the created GameObject.")]
+            public int InstanceId { get; set; }
 
-                // Unity API 呼び出しのためにメインスレッドに切り替え
-                return await MainThread.Instance.RunAsync(() =>
-                {
-                    // Unity API 呼び出しはここに
-                    return "[Success] Async operation completed.";
-                });
-            }
-            catch (Exception ex)
-            {
-                // 構造化されたロギングで例外をログに記録
-                Debug.LogException(ex);
-                return $"[Error] Operation failed: {ex.Message}";
-            }
+            [Description("Hierarchy path of the created GameObject.")]
+            public string? Path { get; set; }
+
+            [Description("Name of the created GameObject.")]
+            public string? Name { get; set; }
         }
     }
 

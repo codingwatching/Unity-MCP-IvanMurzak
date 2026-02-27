@@ -367,8 +367,8 @@ Este proyecto sigue patrones de codificación C# consistentes. Todo el código n
 3. **Atributos**: Usar `[McpPluginTool]`, `[McpPluginPrompt]`, `[McpPluginResource]` para el descubrimiento MCP
 4. **Clases parciales**: Dividir la funcionalidad en varios archivos (por ej., `Tool_GameObject.Create.cs`, `Tool_GameObject.Destroy.cs`)
 5. **Ejecución en el hilo principal**: Envolver todas las llamadas a la API de Unity con `MainThread.Instance.Run()`
-6. **Manejo de errores**: Centralizar los mensajes de error en clases `Error` anidadas dentro de la clase del tool
-7. **Formato de retorno**: Usar los prefijos `[Success]` o `[Error]` en todas las cadenas de retorno para retroalimentación estructurada a la IA
+6. **Manejo de errores**: Lanzar excepciones para los errores — usar `ArgumentException` o `Exception`, nunca devolver cadenas de error
+7. **Tipos de retorno**: Devolver modelos de datos tipados anotados con `[Description]` para retroalimentación estructurada a la IA
 8. **Descripciones**: Anotar todas las APIs públicas y parámetros con `[Description]` para orientación de la IA
 9. **Nomenclatura**: PascalCase para miembros y tipos públicos, `_camelCase` para campos privados de solo lectura
 10. **Seguridad de nulos**: Usar tipos nullable (`?`) y operadores de coalescencia nula (`??`, `??=`)
@@ -396,9 +396,9 @@ using UnityEditor;
 
 using System;
 using System.ComponentModel;
-using System.Threading.Tasks;
-using com.IvanMurzak.Unity.MCP.Common;
-using com.IvanMurzak.Unity.MCP.Utils;
+using com.IvanMurzak.McpPlugin;
+using com.IvanMurzak.Unity.MCP.Runtime.Data;
+using com.IvanMurzak.Unity.MCP.Runtime.Utils;
 using UnityEngine;
 
 namespace com.IvanMurzak.Unity.MCP.Editor.API
@@ -409,26 +409,15 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
     // Patrón: Un archivo por operación (por ej., GameObject.Create.cs, GameObject.Destroy.cs)
     public partial class Tool_GameObject
     {
-        // La clase Error anidada centraliza los mensajes de error para mayor mantenibilidad
-        public static class Error
-        {
-            // Métodos estáticos para formato de error consistente
-            public static string GameObjectNameIsEmpty()
-                => "GameObject name is empty. Please provide a valid name.";
-
-            public static string NotFoundGameObjectAtPath(string path)
-                => $"GameObject '{path}' not found.";
-        }
-
         // Declaración de MCP Tool con metadatos basados en atributos
         [McpPluginTool(
-            "GameObject_Create",                    // Identificador único del tool
-            Title = "Create a new GameObject"       // Título legible por humanos
+            "gameobject-create",                    // Identificador único del tool (kebab-case)
+            Title = "GameObject / Create"           // Título legible por humanos
         )]
         // El atributo Description orienta a la IA sobre cuándo y cómo usar este tool
         [Description(@"Create a new GameObject in the scene.
 Provide position, rotation, and scale to minimize subsequent operations.")]
-        public string Create
+        public CreateResult Create                   // Devolver un modelo de datos tipado, no una cadena
         (
             // Las descripciones de parámetros ayudan a la IA a entender las entradas esperadas
             [Description("Name of the new GameObject.")]
@@ -447,32 +436,32 @@ Provide position, rotation, and scale to minimize subsequent operations.")]
             Vector3? scale = null
         )
         {
-            // cualquier lógica en hilo en segundo plano
-            // ...
+            // Validar antes de entrar al hilo principal — lanzar excepciones para errores
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentException("Name cannot be null or empty.", nameof(name));
 
             return MainThread.Instance.Run(() =>           // Todas las llamadas a la API de Unity DEBEN ejecutarse en el hilo principal
             {
-                // Validar parámetros de entrada al inicio
-                if (string.IsNullOrEmpty(name))
-                    return Error.GameObjectNameIsEmpty();
-
                 // Asignación de coalescencia nula para valores por defecto
                 position ??= Vector3.zero;
                 rotation ??= Vector3.zero;
                 scale ??= Vector3.one;
 
+                // Resolver padre opcional — lanzar excepción en error, no devolver cadenas
+                var parentGo = default(GameObject);
+                if (parentGameObjectRef?.IsValid(out _) == true)
+                {
+                    parentGo = parentGameObjectRef.FindGameObject(out var error);
+                    if (error != null)
+                        throw new ArgumentException(error, nameof(parentGameObjectRef));
+                }
+
                 // Crear GameObject usando la API de Unity
                 var go = new GameObject(name);
 
                 // Establecer padre si se proporcionó
-                if (parentGameObjectRef?.IsValid ?? false)
-                {
-                    var parentGo = parentGameObjectRef.FindGameObject(out var error);
-                    if (error != null)
-                        return $"{error}";
-
+                if (parentGo != null)
                     go.transform.SetParent(parentGo.transform, worldPositionStays: false);
-                }
 
                 // Aplicar valores de transformación
                 go.transform.localPosition = position.Value;
@@ -482,33 +471,27 @@ Provide position, rotation, and scale to minimize subsequent operations.")]
                 // Marcar como modificado para el Unity Editor
                 EditorUtility.SetDirty(go);
 
-                // Devolver mensaje de éxito con datos estructurados
-                // Usar interpolación de cadenas para un formato legible
-                return $"[Success] Created GameObject.\ninstanceID: {go.GetInstanceID()}, path: {go.GetPath()}";
+                // Devolver resultado tipado — propiedades anotadas con [Description] para la IA
+                return new CreateResult
+                {
+                    InstanceId = go.GetInstanceID(),
+                    Path       = go.GetPath(),
+                    Name       = go.name,
+                };
             });
         }
 
-        // Ejemplo de método asíncrono con manejo de errores apropiado
-        public static async Task<string> AsyncOperation(string parameter)
+        // Clase de resultado tipado — datos estructurados devueltos al cliente de IA
+        public class CreateResult
         {
-            try
-            {
-                // Trabajo en segundo plano puede ocurrir aquí
-                await Task.Delay(100);
+            [Description("Instance ID of the created GameObject.")]
+            public int InstanceId { get; set; }
 
-                // Cambiar al hilo principal para las llamadas a la API de Unity
-                return await MainThread.Instance.RunAsync(() =>
-                {
-                    // Llamadas a la API de Unity aquí
-                    return "[Success] Async operation completed.";
-                });
-            }
-            catch (Exception ex)
-            {
-                // Registrar excepciones con logging estructurado
-                Debug.LogException(ex);
-                return $"[Error] Operation failed: {ex.Message}";
-            }
+            [Description("Hierarchy path of the created GameObject.")]
+            public string? Path { get; set; }
+
+            [Description("Name of the created GameObject.")]
+            public string? Name { get; set; }
         }
     }
 

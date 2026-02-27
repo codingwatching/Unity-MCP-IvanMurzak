@@ -367,8 +367,8 @@ graph LR
 3. **特性**：使用 `[McpPluginTool]`、`[McpPluginPrompt]`、`[McpPluginResource]` 进行 MCP 发现
 4. **分部类**：将功能拆分到多个文件中（如 `Tool_GameObject.Create.cs`、`Tool_GameObject.Destroy.cs`）
 5. **主线程执行**：使用 `MainThread.Instance.Run()` 包装所有 Unity API 调用
-6. **错误处理**：在工具类内的嵌套 `Error` 类中集中管理错误消息
-7. **返回格式**：所有返回字符串使用 `[Success]` 或 `[Error]` 前缀，以提供结构化的 AI 反馈
+6. **错误处理**：通过抛出异常来处理错误——使用 `ArgumentException` 或 `Exception`，不要返回错误字符串
+7. **返回类型**：返回带有 `[Description]` 注解的类型化数据模型，以提供结构化的 AI 反馈
 8. **描述**：使用 `[Description]` 为所有公共 API 和参数添加注解，为 AI 提供指导
 9. **命名**：公共成员和类型使用 PascalCase，私有只读字段使用 `_camelCase`
 10. **空值安全**：使用可空类型（`?`）和空合并运算符（`??`、`??=`）
@@ -396,9 +396,9 @@ using UnityEditor;
 
 using System;
 using System.ComponentModel;
-using System.Threading.Tasks;
-using com.IvanMurzak.Unity.MCP.Common;
-using com.IvanMurzak.Unity.MCP.Utils;
+using com.IvanMurzak.McpPlugin;
+using com.IvanMurzak.Unity.MCP.Runtime.Data;
+using com.IvanMurzak.Unity.MCP.Runtime.Utils;
 using UnityEngine;
 
 namespace com.IvanMurzak.Unity.MCP.Editor.API
@@ -409,26 +409,15 @@ namespace com.IvanMurzak.Unity.MCP.Editor.API
     // 模式：每个操作一个文件（如 GameObject.Create.cs、GameObject.Destroy.cs）
     public partial class Tool_GameObject
     {
-        // 嵌套 Error 类集中管理错误消息，便于维护
-        public static class Error
-        {
-            // 用于一致错误格式化的静态方法
-            public static string GameObjectNameIsEmpty()
-                => "GameObject name is empty. Please provide a valid name.";
-
-            public static string NotFoundGameObjectAtPath(string path)
-                => $"GameObject '{path}' not found.";
-        }
-
         // 使用基于特性的元数据声明 MCP Tool
         [McpPluginTool(
-            "GameObject_Create",                    // 唯一工具标识符
-            Title = "Create a new GameObject"       // 人类可读标题
+            "gameobject-create",                    // 唯一工具标识符（kebab-case）
+            Title = "GameObject / Create"           // 人类可读标题
         )]
         // Description 特性指导 AI 何时/如何使用此工具
         [Description(@"Create a new GameObject in the scene.
 Provide position, rotation, and scale to minimize subsequent operations.")]
-        public string Create
+        public CreateResult Create                   // 返回类型化数据模型，而非字符串
         (
             // 参数描述帮助 AI 理解预期输入
             [Description("Name of the new GameObject.")]
@@ -447,32 +436,32 @@ Provide position, rotation, and scale to minimize subsequent operations.")]
             Vector3? scale = null
         )
         {
-            // 后台线程中的任意逻辑
-            // ...
+            // 进入主线程前验证——错误以异常形式抛出
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentException("Name cannot be null or empty.", nameof(name));
 
             return MainThread.Instance.Run(() =>           // 所有 Unity API 调用必须在主线程上运行
             {
-                // 尽早验证输入参数
-                if (string.IsNullOrEmpty(name))
-                    return Error.GameObjectNameIsEmpty();
-
                 // 使用空合并赋值运算符设置默认值
                 position ??= Vector3.zero;
                 rotation ??= Vector3.zero;
                 scale ??= Vector3.one;
 
+                // 解析可选父对象——出错时抛出异常，不返回错误字符串
+                var parentGo = default(GameObject);
+                if (parentGameObjectRef?.IsValid(out _) == true)
+                {
+                    parentGo = parentGameObjectRef.FindGameObject(out var error);
+                    if (error != null)
+                        throw new ArgumentException(error, nameof(parentGameObjectRef));
+                }
+
                 // 使用 Unity API 创建 GameObject
                 var go = new GameObject(name);
 
                 // 如果提供了父对象则设置父子关系
-                if (parentGameObjectRef?.IsValid ?? false)
-                {
-                    var parentGo = parentGameObjectRef.FindGameObject(out var error);
-                    if (error != null)
-                        return $"{error}";
-
+                if (parentGo != null)
                     go.transform.SetParent(parentGo.transform, worldPositionStays: false);
-                }
 
                 // 应用变换值
                 go.transform.localPosition = position.Value;
@@ -482,33 +471,27 @@ Provide position, rotation, and scale to minimize subsequent operations.")]
                 // 在 Unity 编辑器中标记为已修改
                 EditorUtility.SetDirty(go);
 
-                // 返回带结构化数据的成功消息
-                // 使用字符串插值提升可读性
-                return $"[Success] Created GameObject.\ninstanceID: {go.GetInstanceID()}, path: {go.GetPath()}";
+                // 返回类型化结果——属性使用 [Description] 注解以供 AI 使用
+                return new CreateResult
+                {
+                    InstanceId = go.GetInstanceID(),
+                    Path       = go.GetPath(),
+                    Name       = go.name,
+                };
             });
         }
 
-        // 带有适当错误处理的异步方法示例
-        public static async Task<string> AsyncOperation(string parameter)
+        // 类型化结果类——返回给 AI 客户端的结构化数据
+        public class CreateResult
         {
-            try
-            {
-                // 后台工作可在此处进行
-                await Task.Delay(100);
+            [Description("Instance ID of the created GameObject.")]
+            public int InstanceId { get; set; }
 
-                // 切换到主线程进行 Unity API 调用
-                return await MainThread.Instance.RunAsync(() =>
-                {
-                    // Unity API 调用在此处
-                    return "[Success] Async operation completed.";
-                });
-            }
-            catch (Exception ex)
-            {
-                // 使用结构化日志记录异常
-                Debug.LogException(ex);
-                return $"[Error] Operation failed: {ex.Message}";
-            }
+            [Description("Hierarchy path of the created GameObject.")]
+            public string? Path { get; set; }
+
+            [Description("Name of the created GameObject.")]
+            public string? Name { get; set; }
         }
     }
 
