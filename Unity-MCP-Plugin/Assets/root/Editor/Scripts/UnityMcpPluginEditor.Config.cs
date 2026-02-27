@@ -36,9 +36,25 @@ namespace com.IvanMurzak.Unity.MCP
 
         /// <summary>
         /// Absolute path to the config file for use with System.IO File/Directory operations.
+        /// Built from <see cref="ProjectRootPath"/> and <see cref="AssetsFilePath"/> to keep paths consistent.
         /// </summary>
-        public static string AssetsFileAbsolutePath => Path.GetFullPath(
-            Path.Combine(Application.dataPath, "..", "UserSettings", $"{ResourcesFileName}.json"));
+        public static string AssetsFileAbsolutePath => Path.GetFullPath(Path.Combine(ProjectRootPath, AssetsFilePath));
+
+        /// <summary>
+        /// Absolute path to the skills root folder for use with System.IO File/Directory operations.
+        /// If <see cref="SkillsRootFolder"/> is already an absolute path it is returned as-is;
+        /// otherwise it is resolved relative to <see cref="ProjectRootPath"/>.
+        /// </summary>
+        public static string SkillsRootFolderAbsolutePath
+        {
+            get
+            {
+                var folder = SkillsRootFolder;
+                return Path.IsPathRooted(folder)
+                    ? folder
+                    : Path.GetFullPath(Path.Combine(ProjectRootPath, folder));
+            }
+        }
 
 #if UNITY_EDITOR
         public static UnityEngine.TextAsset AssetFile => UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.TextAsset>(AssetsFilePath);

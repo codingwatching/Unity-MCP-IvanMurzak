@@ -11,7 +11,6 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using com.IvanMurzak.McpPlugin.Common.Model;
 using com.IvanMurzak.McpPlugin.Common.Utils;
@@ -947,16 +946,10 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                     return;
                 }
 
-                // Resolve relative paths against the project root so skill files are always placed
-                // inside the Unity project regardless of the process working directory.
-                var basePath = UnityMcpPluginEditor.SkillsRootFolder;
-                if (!Path.IsPathRooted(basePath))
-                    basePath = Path.GetFullPath(Path.Combine(UnityMcpPluginEditor.ProjectRootPath, basePath));
-
                 new SkillFileGenerator(UnityMcpPluginEditor.Instance.Logger).Generate(
                     tools: tools.GetAllTools(),
                     rootFolder: "unity-editor",
-                    basePath: basePath
+                    basePath: UnityMcpPluginEditor.SkillsRootFolderAbsolutePath
                 );
             });
         }
