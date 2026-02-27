@@ -25,7 +25,7 @@ Unlike other tools, this plugin works **inside your compiled game**, allowing fo
 
 > **[💬 Join our Discord Server](https://discord.gg/cfbdMZX99G)** - Ask questions, showcase your work, and connect with other developers!
 
-## ![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-features.svg?raw=true)
+## ![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-features.svg?raw=true)
 
 - ✔️ **AI agents** - Use the best agents from **Anthropic**, **OpenAI**, **Microsoft**, or any other provider with no limits
 - ✔️ **TOOLS** - A wide range of default [MCP Tools](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/default-mcp-tools.md) for operating in Unity Editor
@@ -41,7 +41,7 @@ Unlike other tools, this plugin works **inside your compiled game**, allowing fo
 
 ![AI Game Developer Windows](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/editor/ai-game-developer-windows.png?raw=true)
 
-![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # Quick Start
 
@@ -140,7 +140,7 @@ Install extensions when need more tools or [create your own](#add-custom-mcp-too
 - [ParticleSystem](https://github.com/IvanMurzak/Unity-AI-ParticleSystem/)
 - [ProBuilder](https://github.com/IvanMurzak/Unity-AI-ProBuilder/)
 
-![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # Contents
 
@@ -197,7 +197,7 @@ Install extensions when need more tools or [create your own](#add-custom-mcp-too
 | [Development Guide](docs/dev/Development.md) | Architecture, code style, CI/CD — for contributors |
 | [Wiki](https://github.com/IvanMurzak/Unity-MCP/wiki) | Getting started, tutorials, API reference, FAQ |
 
-![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # Installation
 
@@ -322,7 +322,7 @@ If automatic configuration doesn't work for you for any reason, use the JSON fro
   > Replace `<command>` from the table above
 </details>
 
-![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # AI Workflow Examples: Claude & Gemini
 
@@ -368,7 +368,7 @@ Unity MCP provides advanced tools that enable the LLM to work faster and more ef
 - ✔️ **Live Unity API** - Unity API instantly available - even when Unity changes, you get the fresh API
 - ✔️ **Self-documenting** - Access human-readable descriptions of any `class`, `method`, or `property` via `Description` attributes
 
-![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # Customize MCP
 
@@ -430,7 +430,7 @@ public static class Prompt_ScriptingCode
 }
 ```
 
-![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # Runtime usage (in-game)
 
@@ -483,7 +483,7 @@ public static class ChessGameAI
 
 There are many use cases, lets imagine you are working on a Chess game with bot. You may outsource the bot decision making to LLM by writing few lines of code.
 
-![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # Unity `MCP Server` setup
 
@@ -616,7 +616,7 @@ You may launch Unity `MCP Server` directly from a binary file. You would need to
 
 </details>
 
-![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # How Unity MCP Architecture Works
 
@@ -719,7 +719,7 @@ It is a bridge between `MCP Client` and "something else", in this particular cas
 - "Performance is critical - prefer object pooling for frequently instantiated objects"
 - "This project follows SOLID principles - explain any architecture decisions"
 
-![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # Contribution 💙💛
 
@@ -733,4 +733,4 @@ Contributions are highly appreciated. Bring your ideas and let's make game devel
 4. Implement new things in the project, commit, push it to GitHub
 5. Create Pull Request targeting original [Unity-MCP](https://github.com/IvanMurzak/Unity-MCP/compare) repository, `main` branch.
 
-![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)

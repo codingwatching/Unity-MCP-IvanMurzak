@@ -58,7 +58,7 @@ This document explains the internal structure, design, code style, and main prin
 
 ---
 
-![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # Vision & Goals
 
@@ -73,7 +73,7 @@ We believe that AI will be (if not already) an important part of game developmen
 
 ---
 
-![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # Prerequisites
 
@@ -91,7 +91,7 @@ Before contributing, ensure the following tools are installed:
 
 ---
 
-![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # Local Development Setup
 
@@ -128,7 +128,7 @@ Before contributing, ensure the following tools are installed:
 
 ---
 
-![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # Contribute
 
@@ -138,7 +138,7 @@ Lets build the bright game development future together, contribute to the projec
 2. Make your improvements, follow code style
 3. [Create Pull Request](https://github.com/IvanMurzak/Unity-MCP/compare)
 
-![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # Projects structure
 
@@ -353,7 +353,7 @@ graph LR
 
 ---
 
-![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # Code Style
 
@@ -529,7 +529,7 @@ Provide position, rotation, and scale to minimize subsequent operations.")]
 
 ---
 
-![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # Running Tests
 
@@ -567,7 +567,7 @@ Each CI job is named `test-unity-{version}-{mode}` (e.g., `test-unity-6000-3-1f1
 
 ---
 
-![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)
 
 # CI/CD
 
@@ -689,4 +689,4 @@ Here is what you need to know when working with CI as a contributor:
 3. **Docker Hub** - Containerized MCP Server for cloud deployments
 4. **OpenUPM** - Unity plugin package (automatically synced from GitHub releases)
 
-![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)
