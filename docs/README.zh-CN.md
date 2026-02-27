@@ -25,7 +25,7 @@
 
 > **[💬 加入我们的 Discord 服务器](https://discord.gg/cfbdMZX99G)** — 提问、展示作品，与其他开发者交流！
 
-## ![AI 游戏开发者 — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-features.svg?raw=true)
+## ![AI 游戏开发者 — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-features.zh-CN.svg?raw=true)
 
 - ✔️ **AI 智能体** — 无限制使用来自 **Anthropic**、**OpenAI**、**Microsoft** 或任何其他服务商的最优秀智能体
 - ✔️ **工具（TOOLS）** — 丰富的默认 [MCP 工具](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/default-mcp-tools.md)，用于在 Unity 编辑器中操作

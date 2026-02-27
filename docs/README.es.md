@@ -25,7 +25,7 @@ A diferencia de otras herramientas, este plugin funciona **dentro de tu juego co
 
 > **[💬 Únete a nuestro servidor de Discord](https://discord.gg/cfbdMZX99G)** - ¡Haz preguntas, muestra tu trabajo y conéctate con otros desarrolladores!
 
-## ![Desarrollador de Juegos con IA — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-features.svg?raw=true)
+## ![Desarrollador de Juegos con IA — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-features.es.svg?raw=true)
 
 - ✔️ **Agentes de IA** - Usa los mejores agentes de **Anthropic**, **OpenAI**, **Microsoft** u cualquier otro proveedor sin límites
 - ✔️ **HERRAMIENTAS** - Una amplia gama de [Herramientas MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/default-mcp-tools.md) predeterminadas para operar en el Editor de Unity

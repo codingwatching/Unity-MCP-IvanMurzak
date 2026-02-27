@@ -25,7 +25,7 @@
 
 > **[💬 Discord サーバーに参加](https://discord.gg/cfbdMZX99G)** - 質問したり、作品を披露したり、他の開発者とつながりましょう！
 
-## ![AI ゲーム開発者 — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-features.svg?raw=true)
+## ![AI ゲーム開発者 — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-features.ja.svg?raw=true)
 
 - ✔️ **AI エージェント** - **Anthropic**、**OpenAI**、**Microsoft**、その他あらゆるプロバイダーの最良のエージェントを制限なく使用
 - ✔️ **ツール** - Unity Editor で操作するための豊富なデフォルト [MCP ツール](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/default-mcp-tools.md)
