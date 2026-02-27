@@ -59,7 +59,7 @@ docker run \
 STDIO mode is used when the MCP Client manages the Docker process directly.
 
 ```bash
-docker run -t \
+docker run -i \
   -e MCP_PLUGIN_CLIENT_TRANSPORT=stdio \
   -p 8080:8080 \
   ivanmurzakdev/unity-mcp-server:latest

@@ -116,13 +116,14 @@
    ```
 
 5. **将插件指向本地 Server** *（可选——跳过自动下载的二进制文件）*
-   - 在 Unity 中：打开 `Window/AI Game Developer (Unity-MCP)`
+   - 在 Unity 中：打开 `Window/AI Game Developer — MCP`
    - 将端口设置为与本地 Server 一致（默认为 `8080`）
    - 插件将自动连接
 
 6. **使用 MCP Inspector 进行调试** *（可选）*
    ```bash
-   Commands/start_mcp_inspector.bat   # Windows
+   Unity-MCP-Plugin/Commands/start_mcp_inspector.bat   # Windows (.bat)
+   Unity-MCP-Server/commands/start-mcp-inspector.ps1   # PowerShell（跨平台）
    ```
    需要 Node.js。在 `http://localhost:5173` 打开浏览器 UI，用于实时检查 MCP 协议消息。
 

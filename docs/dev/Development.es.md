@@ -116,13 +116,14 @@ Antes de contribuir, asegúrate de tener instaladas las siguientes herramientas:
    ```
 
 5. **Apuntar el Plugin a tu servidor local** *(opcional — omite el binario descargado automáticamente)*
-   - En Unity: abre `Window/AI Game Developer (Unity-MCP)`
+   - En Unity: abre `Window/AI Game Developer — MCP`
    - Establece el puerto para que coincida con tu servidor local (`8080` por defecto)
    - El plugin se conectará automáticamente
 
 6. **Depurar con MCP Inspector** *(opcional)*
    ```bash
-   Commands/start_mcp_inspector.bat   # Windows
+   Unity-MCP-Plugin/Commands/start_mcp_inspector.bat   # Windows (.bat)
+   Unity-MCP-Server/commands/start-mcp-inspector.ps1   # PowerShell (multiplataforma)
    ```
    Requiere Node.js. Abre una interfaz en el navegador en `http://localhost:5173` para la inspección en tiempo real de los mensajes del protocolo MCP.
 

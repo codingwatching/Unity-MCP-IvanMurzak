@@ -93,7 +93,7 @@ Manage scene objects and hierarchy.
 | **Package Manager / Remove** | `package-remove` | Uninstall a package. |
 | **Package Manager / Search** | `package-search` | Search Unity Registry. |
 
-## � Object
+## 🧩 Object
 | Tool | ID | Description |
 | :--- | :--- | :--- |
 | **Object / Get Data** | `object-get-data` | Get serialized data of a Unity Object including properties and fields. |

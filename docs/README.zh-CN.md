@@ -49,7 +49,7 @@
 
 1. **[安装插件](#第一步安装-unity-mcp-插件)** — 下载 `.unitypackage` 安装器，或运行 `openupm add com.ivanmurzak.unity.mcp`
 2. **[选择 MCP 客户端](#第二步安装-mcp-客户端)** — Claude Code、Claude Desktop、GitHub Copilot、Cursor 或其他
-3. **[配置客户端](#第三步配置-mcp-客户端)** — 在 Unity 中打开 `Window/AI Game Developer - MCP`，点击 **Configure**
+3. **[配置客户端](#第三步配置-mcp-客户端)** — 在 Unity 中打开 `Window/AI Game Developer — MCP`，点击 **Configure**
 
 就是这样。询问 AI *"以半径 2 圆形排列创建 3 个立方体"*，然后观看它的执行。✨
 
@@ -57,7 +57,7 @@
 
 # 工具参考
 
-插件内置 50+ 个工具，分为三个类别。安装后所有工具立即可用，无需额外配置。完整参考及详细说明请见 [docs/default-mcp-tools.md](docs/default-mcp-tools.md)。
+插件内置 50+ 个工具，分为三个类别。安装后所有工具立即可用，无需额外配置。完整参考及详细说明请见 [default-mcp-tools.md](default-mcp-tools.md)。
 
 <details>
   <summary>项目与资产</summary>
@@ -191,10 +191,10 @@
 
 | 文档 | 描述 |
 | ---- | ---- |
-| [默认 MCP 工具](docs/default-mcp-tools.md) | 所有内置工具的完整参考及描述 |
-| [MCP 服务器设置](docs/mcp-server.md) | 服务器配置、环境变量、远程托管 |
-| [Docker 部署](docs/DOCKER_DEPLOYMENT.md) | 分步 Docker 部署指南 |
-| [开发指南](docs/dev/Development.md) | 架构、代码风格、CI/CD — 面向贡献者 |
+| [默认 MCP 工具](default-mcp-tools.md) | 所有内置工具的完整参考及描述 |
+| [MCP 服务器设置](mcp-server.md) | 服务器配置、环境变量、远程托管 |
+| [Docker 部署](DOCKER_DEPLOYMENT.md) | 分步 Docker 部署指南 |
+| [开发指南](dev/Development.md) | 架构、代码风格、CI/CD — 面向贡献者 |
 | [Wiki](https://github.com/IvanMurzak/Unity-MCP/wiki) | 入门教程、API 参考、常见问题 |
 
 ![AI 游戏开发者 — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/promo/hazzard-divider.svg?raw=true)

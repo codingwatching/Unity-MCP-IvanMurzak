@@ -49,7 +49,7 @@ Get up and running in three steps:
 
 1. **[Install the Plugin](#step-1-install-unity-mcp-plugin)** — download the `.unitypackage` installer or run `openupm add com.ivanmurzak.unity.mcp`
 2. **[Pick an MCP Client](#step-2-install-mcp-client)** — Claude Code, Claude Desktop, GitHub Copilot, Cursor, or any other
-3. **[Configure the client](#step-3-configure-mcp-client)** — open `Window/AI Game Developer - MCP` in Unity and click **Configure**
+3. **[Configure the client](#step-3-configure-mcp-client)** — open `Window/AI Game Developer — MCP` in Unity and click **Configure**
 
 That's it. Ask your AI *"Create 3 cubes in a circle with radius 2"* and watch it happen. ✨
 

@@ -5,6 +5,10 @@
       <path d="M 0,0 L 60,0 L 120,120 L 60,120 Z" class="hazard-stripe"/>
     </pattern>
 
+    <clipPath id="viewportClip">
+      <rect x="0" y="0" width="1184" height="60"/>
+    </clipPath>
+
     <filter id="textShadow" x="-50%" y="-50%" width="200%" height="200%">
       <feDropShadow dx="3" dy="3" stdDeviation="5" class="shadow-color" flood-opacity="0.9"/>
     </filter>
