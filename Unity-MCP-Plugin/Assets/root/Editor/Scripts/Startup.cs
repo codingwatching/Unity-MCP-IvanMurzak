@@ -11,7 +11,6 @@
 #nullable enable
 using com.IvanMurzak.McpPlugin.Skills;
 using com.IvanMurzak.Unity.MCP.Editor.Utils;
-using com.IvanMurzak.Unity.MCP.Runtime.Utils;
 using com.IvanMurzak.Unity.MCP.Utils;
 using Microsoft.Extensions.Logging;
 using UnityEditor;
@@ -58,7 +57,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor
             new SkillFileGenerator(UnityMcpPluginEditor.Instance.Logger).Generate(
                 tools: tools.GetAllTools(),
                 rootFolder: "unity-editor",
-                basePath: UnityMcpPluginEditor.SkillsRootFolder
+                basePath: UnityMcpPluginEditor.SkillsRootFolderAbsolutePath
             );
         }
     }

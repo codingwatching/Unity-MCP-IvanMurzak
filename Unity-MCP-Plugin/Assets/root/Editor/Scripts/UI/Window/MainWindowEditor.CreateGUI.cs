@@ -945,10 +945,11 @@ namespace com.IvanMurzak.Unity.MCP.Editor.UI
                     Logger.LogWarning("Cannot generate skill files: Tools manager is not available.");
                     return;
                 }
+
                 new SkillFileGenerator(UnityMcpPluginEditor.Instance.Logger).Generate(
                     tools: tools.GetAllTools(),
                     rootFolder: "unity-editor",
-                    basePath: UnityMcpPluginEditor.SkillsRootFolder
+                    basePath: UnityMcpPluginEditor.SkillsRootFolderAbsolutePath
                 );
             });
         }
