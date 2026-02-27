@@ -43,7 +43,21 @@ Unlike other tools, this plugin works **inside your compiled game**, allowing fo
 
 ![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
 
-## Tools
+# Quick Start
+
+Get up and running in three steps:
+
+1. **[Install the Plugin](#step-1-install-unity-mcp-plugin)** — download the `.unitypackage` installer or run `openupm add com.ivanmurzak.unity.mcp`
+2. **[Pick an MCP Client](#step-2-install-mcp-client)** — Claude Code, Claude Desktop, GitHub Copilot, Cursor, or any other
+3. **[Configure the client](#step-3-configure-mcp-client)** — open `Window/AI Game Developer - MCP` in Unity and click **Configure**
+
+That's it. Ask your AI *"Create 3 cubes in a circle with radius 2"* and watch it happen. ✨
+
+---
+
+# Tools Reference
+
+The plugin ships with 50+ built-in tools across three categories. All tools are available immediately after installation — no extra configuration required. See [docs/default-mcp-tools.md](docs/default-mcp-tools.md) for the full reference with detailed descriptions.
 
 <details>
   <summary>Project & Assets</summary>
@@ -120,23 +134,21 @@ Unlike other tools, this plugin works **inside your compiled game**, allowing fo
 
 #### Additional tools
 
+Install extensions when need more tools or [create your own](#add-custom-mcp-tool).
+
 - [Animation](https://github.com/IvanMurzak/Unity-AI-Animation/)
 - [ParticleSystem](https://github.com/IvanMurzak/Unity-AI-ParticleSystem/)
 - [ProBuilder](https://github.com/IvanMurzak/Unity-AI-ProBuilder/)
 
-## Stability status
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
 
-| Unity Version | Editmode                                                                                                                                                                               | Playmode                                                                                                                                                                               | Standalone                                                                                                                                                                               |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2022.3.62f3   | [![r](https://github.com/IvanMurzak/Unity-MCP/workflows/release/badge.svg?job=test-unity-2022-3-62f3-editmode)](https://github.com/IvanMurzak/Unity-MCP/actions/workflows/release.yml) | [![r](https://github.com/IvanMurzak/Unity-MCP/workflows/release/badge.svg?job=test-unity-2022-3-62f3-playmode)](https://github.com/IvanMurzak/Unity-MCP/actions/workflows/release.yml) | [![r](https://github.com/IvanMurzak/Unity-MCP/workflows/release/badge.svg?job=test-unity-2022-3-62f3-standalone)](https://github.com/IvanMurzak/Unity-MCP/actions/workflows/release.yml) |
-| 2023.2.22f1   | [![r](https://github.com/IvanMurzak/Unity-MCP/workflows/release/badge.svg?job=test-unity-2023-2-22f1-editmode)](https://github.com/IvanMurzak/Unity-MCP/actions/workflows/release.yml) | [![r](https://github.com/IvanMurzak/Unity-MCP/workflows/release/badge.svg?job=test-unity-2023-2-22f1-playmode)](https://github.com/IvanMurzak/Unity-MCP/actions/workflows/release.yml) | [![r](https://github.com/IvanMurzak/Unity-MCP/workflows/release/badge.svg?job=test-unity-2023-2-22f1-standalone)](https://github.com/IvanMurzak/Unity-MCP/actions/workflows/release.yml) |
-| 6000.3.1f1    | [![r](https://github.com/IvanMurzak/Unity-MCP/workflows/release/badge.svg?job=test-unity-6000-3-1f1-editmode)](https://github.com/IvanMurzak/Unity-MCP/actions/workflows/release.yml)  | [![r](https://github.com/IvanMurzak/Unity-MCP/workflows/release/badge.svg?job=test-unity-6000-3-1f1-playmode)](https://github.com/IvanMurzak/Unity-MCP/actions/workflows/release.yml)  | [![r](https://github.com/IvanMurzak/Unity-MCP/workflows/release/badge.svg?job=test-unity-6000-3-1f1-standalone)](https://github.com/IvanMurzak/Unity-MCP/actions/workflows/release.yml)  |
+# Contents
 
----
-
-# Content
-
-- [Content](#content)
+- [Quick Start](#quick-start)
+- [Tools Reference](#tools-reference)
+      - [Additional tools](#additional-tools)
+- [Contents](#contents)
+  - [More Documentation](#more-documentation)
 - [Installation](#installation)
   - [Step 1: Install `Unity MCP Plugin`](#step-1-install-unity-mcp-plugin)
     - [Option 1 - Installer](#option-1---installer)
@@ -174,6 +186,16 @@ Unlike other tools, this plugin works **inside your compiled game**, allowing fo
   - [What is `MCP Prompt`](#what-is-mcp-prompt)
     - [When to use `MCP Prompt`](#when-to-use-mcp-prompt)
 - [Contribution 💙💛](#contribution-)
+
+## More Documentation
+
+| Document | Description |
+| -------- | ----------- |
+| [Default MCP Tools](docs/default-mcp-tools.md) | Full reference of all built-in tools with descriptions |
+| [MCP Server Setup](docs/mcp-server.md) | Server configuration, environment variables, remote hosting |
+| [Docker Deployment](docs/DOCKER_DEPLOYMENT.md) | Step-by-step Docker deployment guide |
+| [Development Guide](docs/dev/Development.md) | Architecture, code style, CI/CD — for contributors |
+| [Wiki](https://github.com/IvanMurzak/Unity-MCP/wiki) | Getting started, tutorials, API reference, FAQ |
 
 ![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
 
@@ -479,6 +501,8 @@ Doesn't matter what launch option you choose, all of them support custom configu
 
 > Command line args support also the option with a single `-` prefix (`-port`) and an option without prefix at all (`port`).
 
+> **Choosing a transport:** Use `stdio` when the MCP client launches the server binary directly (local use — this is the most common setup). Use `streamableHttp` when running the server as a standalone process or in Docker/cloud, and connecting over HTTP.
+
 ## Docker 📦
 
 [![Docker Image](https://img.shields.io/docker/image-size/ivanmurzakdev/unity-mcp-server/latest?label=Docker%20Image&logo=docker&labelColor=333A41 'Docker Image')](https://hub.docker.com/r/ivanmurzakdev/unity-mcp-server)
@@ -708,3 +732,5 @@ Contributions are highly appreciated. Bring your ideas and let's make game devel
 3. Clone the fork and open the `./Unity-MCP-Plugin` folder in Unity
 4. Implement new things in the project, commit, push it to GitHub
 5. Create Pull Request targeting original [Unity-MCP](https://github.com/IvanMurzak/Unity-MCP/compare) repository, `main` branch.
+
+![AI Game Developer — Unity MCP](https://github.com/IvanMurzak/Unity-MCP/blob/update/readme-svg/docs/img/promo/hazzard-divider.svg?raw=true)
