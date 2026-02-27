@@ -39,26 +39,7 @@ namespace com.IvanMurzak.Unity.MCP.Editor
             UpdateChecker.Init();
             PackageUtils.Init();
 
-            GenerateSkillFilesIfNeeded();
-        }
-
-        static void GenerateSkillFilesIfNeeded()
-        {
-            if (!UnityMcpPluginEditor.GenerateSkillFiles)
-                return;
-
-            var tools = UnityMcpPluginEditor.Instance.Tools;
-            if (tools == null)
-            {
-                _logger.LogDebug("Cannot auto-generate skill files: Tools manager is not available.");
-                return;
-            }
-
-            new SkillFileGenerator(UnityMcpPluginEditor.Instance.Logger).Generate(
-                tools: tools.GetAllTools(),
-                rootFolder: "unity-editor",
-                basePath: UnityMcpPluginEditor.SkillsRootFolderAbsolutePath
-            );
+            UnityMcpPluginEditor.Instance.McpPluginInstance!.GenerateSkillFilesIfNeeded(UnityMcpPluginEditor.ProjectRootPath);
         }
     }
 }

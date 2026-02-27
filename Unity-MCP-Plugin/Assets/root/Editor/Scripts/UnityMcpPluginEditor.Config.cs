@@ -42,14 +42,14 @@ namespace com.IvanMurzak.Unity.MCP
 
         /// <summary>
         /// Absolute path to the skills root folder for use with System.IO File/Directory operations.
-        /// If <see cref="SkillsRootFolder"/> is already an absolute path it is returned as-is;
+        /// If <see cref="SkillsPath"/> is already an absolute path it is returned as-is;
         /// otherwise it is resolved relative to <see cref="ProjectRootPath"/>.
         /// </summary>
         public static string SkillsRootFolderAbsolutePath
         {
             get
             {
-                var folder = SkillsRootFolder;
+                var folder = SkillsPath;
                 return Path.IsPathRooted(folder)
                     ? folder
                     : Path.GetFullPath(Path.Combine(ProjectRootPath, folder));
