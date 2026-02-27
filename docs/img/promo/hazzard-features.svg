@@ -1,25 +1,25 @@
-<svg width="1184" height="100" xmlns="http://www.w3.org/2000/svg">
+<svg width="1184" height="60" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <pattern id="hazardStripes" x="0" y="0" width="120" height="120" patternUnits="userSpaceOnUse">
       <rect width="120" height="120" class="hazard-bg"/>
       <path d="M 0,0 L 60,0 L 120,120 L 60,120 Z" class="hazard-stripe"/>
     </pattern>
 
+    <clipPath id="viewportClip">
+      <rect x="0" y="0" width="1184" height="60"/>
+    </clipPath>
+
     <filter id="textShadow" x="-50%" y="-50%" width="200%" height="200%">
       <feDropShadow dx="3" dy="3" stdDeviation="5" class="shadow-color" flood-opacity="0.9"/>
     </filter>
     
-    <clipPath id="viewportClip">
-      <rect x="0" y="0" width="1184" height="120"/>
-    </clipPath>
-    
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700;800&amp;display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@600;display=swap');
 
       text {
         font-family: 'Inter', sans-serif;
-        font-weight: 700;
-        font-size: 56px;
+        font-weight: 600;
+        font-size: 46px;
         text-anchor: middle;
         dominant-baseline: middle;
       }
@@ -30,11 +30,11 @@
       }
 
       .hazard-bg {
-        fill: #FFDC0000;
+        fill: transparent;
       }
 
       .hazard-stripe {
-        fill: #FFDC0080;
+        fill: #FFDC00;
       }
 
       .ai-text {
@@ -66,7 +66,7 @@
         }
 
         .hazard-stripe {
-          fill: #FFDC0080;
+          fill: #FF000080;
         }
 
         .main-text {
@@ -90,11 +90,11 @@
   </g>
   
   <!-- Text with shadow -->
+  <a href="https://github.com/IvanMurzak/Unity-MCP#features" target="_blank">
   <a href="https://github.com/IvanMurzak/Unity-MCP" target="_blank">
-    <text x="592" y="53" class="text-main">
-      <tspan class="ai-text">AI</tspan>
-      <tspan class="main-text"> Game Developer — </tspan>
-      <tspan class="main-text italic-text">Unity MCP</tspan>
+    <text x="592" y="32" class="text-main">
+      <tspan class="main-text">Features</tspan>
     </text>
+  </a>
   </a>
 </svg>
