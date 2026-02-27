@@ -19,8 +19,6 @@ namespace com.IvanMurzak.Unity.MCP
     /// </summary>
     public partial class UnityMcpPluginEditor : UnityMcpPlugin
     {
-        public const string? SkillsBaseFolder22 = null; // "unity-editor"
-
         protected UnityMcpPluginEditor() : base()
         {
             var config = GetOrCreateConfig(out var wasCreated);
