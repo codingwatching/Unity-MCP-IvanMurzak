@@ -509,6 +509,8 @@ Sin importar qué opción de lanzamiento elijas, todas admiten configuración pe
 
 Asegúrate de que Docker esté instalado. Y por favor verifica que Docker Desktop esté iniciado si estás en Windows.
 
+[Lee las instrucciones avanzadas de configuración de Docker](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/DOCKER_DEPLOYMENT.md).
+
 ### Transporte `streamableHttp`
 
 ```bash

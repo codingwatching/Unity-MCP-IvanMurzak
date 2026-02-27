@@ -509,6 +509,8 @@ Doesn't matter what launch option you choose, all of them support custom configu
 
 Make sure Docker is installed. And please make sure Docker Desktop is launched if you are at Windows operation system.
 
+[Read advanced Docker configuration instructions](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/DOCKER_DEPLOYMENT.md).
+
 ### `streamableHttp` Transport
 
 ```bash

@@ -509,6 +509,8 @@ public static class ChessGameAI
 
 确保已安装 Docker。如果你在 Windows 操作系统上，请确保 Docker Desktop 已启动。
 
+[阅读高级 Docker 配置说明](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/DOCKER_DEPLOYMENT.md)。
+
 ### `streamableHttp` 传输
 
 ```bash
