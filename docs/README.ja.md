@@ -37,7 +37,7 @@
 - ✔️ **柔軟なデプロイ** - 設定によりローカル（stdio）およびリモート（http）で動作
 - ✔️ **拡張可能** - [プロジェクトコードにカスタム MCP ツールを作成](#カスタム-mcp-ツールの追加)可能
 
-[![インストーラーをダウンロード](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/button/button_download.svg?raw=true)](https://github.com/IvanMurzak/Unity-MCP/releases/download/0.51.1/AI-Game-Dev-Installer.unitypackage)
+[![インストーラーをダウンロード](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/button/button_download.svg?raw=true)](https://github.com/IvanMurzak/Unity-MCP/releases/download/0.51.2/AI-Game-Dev-Installer.unitypackage)
 
 ![AI Game Developer Windows](https://github.com/IvanMurzak/Unity-MCP/blob/main/docs/img/editor/ai-game-developer-windows.png?raw=true)
 
@@ -216,7 +216,7 @@
 
 ### オプション 1 - インストーラー
 
-- **[⬇️ インストーラーをダウンロード](https://github.com/IvanMurzak/Unity-MCP/releases/download/0.51.1/AI-Game-Dev-Installer.unitypackage)**
+- **[⬇️ インストーラーをダウンロード](https://github.com/IvanMurzak/Unity-MCP/releases/download/0.51.2/AI-Game-Dev-Installer.unitypackage)**
 - **📂 Unity プロジェクトにインストーラーをインポート**
   > - ファイルをダブルクリックすると Unity が自動的に開きます
   > - または: Unity Editor を先に開き、`Assets/Import Package/Custom Package` をクリックしてファイルを選択
