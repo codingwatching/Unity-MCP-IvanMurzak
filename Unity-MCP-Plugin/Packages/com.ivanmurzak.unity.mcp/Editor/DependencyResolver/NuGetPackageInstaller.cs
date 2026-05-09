@@ -13,7 +13,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace com.IvanMurzak.Unity.MCP.Editor.DependencyResolver
@@ -127,19 +126,8 @@ namespace com.IvanMurzak.Unity.MCP.Editor.DependencyResolver
                 // operate on the same filenames the collision check would compare against.
                 var planned = NuGetExtractor.PlanDllPaths(nupkgPath, installPath, package.Version);
 
-                // Filesystem-based stale-version sweep. The manifest-driven
-                // RemoveStaleSiblingVersions above only catches stale DLLs the
-                // manifest knows about — if the manifest was deleted, never
-                // existed, or got out of sync with disk, a stale
-                // <c>{stem}.&lt;olderVersion&gt;.dll</c> would survive and Unity
-                // would load it alongside the freshly extracted current-version
-                // copy (duplicate-assembly errors). For each DLL stem this
-                // package ships, scan the install root for any
-                // <c>{stem}.dll</c> or <c>{stem}.&lt;numericVersion&gt;.dll</c>
-                // whose version doesn't match the current package version, and
-                // remove it (along with its .meta sidecar). The current-version
-                // canonical filename is preserved — it will be overwritten by
-                // extraction or already up to date.
+                // Filesystem fallback for stale DLLs the manifest doesn't know about
+                // (manifest deleted, partial-restore failure, AV quarantine).
                 if (RemoveStaleVersionDllsByStem(installPath, planned, package.Version, package.Id))
                     anyInstalled = true;
 
@@ -367,96 +355,54 @@ namespace com.IvanMurzak.Unity.MCP.Editor.DependencyResolver
         }
 
         /// <summary>
-        /// Filesystem-driven complement to <see cref="RemoveStaleSiblingVersions"/>.
-        /// For every DLL stem the package ships (read off the .nupkg via
-        /// <paramref name="planned"/>), scans <paramref name="installPath"/>
-        /// for any sibling that matches <c>{stem}.dll</c> or
-        /// <c>{stem}.&lt;numericVersion&gt;.dll</c> at a version OTHER than
-        /// <paramref name="keepVersion"/>, and removes it together with its
-        /// <c>.meta</c> sidecar. The canonical
-        /// <c>{stem}.{keepVersion}.dll</c> filename is intentionally
-        /// preserved — extraction below will overwrite it (or short-circuit
-        /// via the <c>alreadyOnDisk</c> gate when nothing changed).
-        ///
-        /// <para>
-        /// Why we need both this and the manifest-driven scan: when the
-        /// manifest is missing, corrupted, or has drifted out of sync with
-        /// disk (manual deletion, partial-restore failure, AV quarantine),
-        /// the manifest-driven cleanup has nothing to act on and a stale
-        /// <c>{stem}.&lt;olderVersion&gt;.dll</c> from a prior install
-        /// survives. Unity then sees both the stale and the freshly
-        /// extracted current-version copy, registers the same assembly
-        /// manifest name twice, and the project breaks with CS0436 /
-        /// CS0433 duplicate-assembly errors. The filesystem sweep is the
-        /// authoritative pass that catches that case independently of any
-        /// manifest state.
-        /// </para>
-        ///
-        /// <para>
-        /// Cross-stem safety: the regex anchors on the DLL stem followed
-        /// either by <c>.dll</c> directly or by a strictly numeric version
-        /// tail (<c>\d+(\.\d+){0,3}</c>). A package shipping <c>Foo.dll</c>
-        /// cannot accidentally match <c>Foo.Bar.10.0.0.dll</c> because
-        /// <c>Bar.10.0.0</c> isn't numeric-only. A package shipping
-        /// <c>Foo.dll</c> at version 1.0.0 also won't delete a different
-        /// package's <c>Foo.dll</c> at 2.0.0 if both somehow ended up in
-        /// the same install path — but that scenario means two packages
-        /// claiming the same assembly stem at incompatible versions, which
-        /// would already be a project-breaking duplicate even without this
-        /// sweep, and the loud delete log makes the conflict visible.
-        /// </para>
-        ///
-        /// Returns true when at least one file was removed.
+        /// Filesystem-driven complement to <see cref="RemoveStaleSiblingVersions"/>:
+        /// removes any <c>{stem}.dll</c> or <c>{stem}.{anyOtherVersion}.dll</c> on
+        /// disk for the DLL stems this package ships, leaving only the canonical
+        /// <c>{stem}.{keepVersion}.dll</c>. Catches stale DLLs the manifest
+        /// doesn't know about (manifest deleted, partial-restore failure, AV
+        /// quarantine) — without this, the freshly extracted current-version
+        /// copy and the orphan stale copy coexist and Unity errors with CS0436.
         /// </summary>
         internal static bool RemoveStaleVersionDllsByStem(string installPath, IReadOnlyList<PlannedDll> planned, string keepVersion, string packageId)
         {
             if (!Directory.Exists(installPath) || planned.Count == 0)
                 return false;
 
-            // Original DLL stems shipped by the package — keyed off the .nupkg
-            // entry path, not the planned canonical filename, so the regex
-            // matches whatever the user has on disk regardless of how it got
-            // there.
-            var originalStems = planned
-                .Select(p => Path.GetFileNameWithoutExtension(Path.GetFileName(p.EntryFullName)))
-                .Where(s => !string.IsNullOrEmpty(s))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
+            var originalStems = new HashSet<string>(
+                planned
+                    .Select(p => Path.GetFileNameWithoutExtension(Path.GetFileName(p.EntryFullName)))
+                    .Where(s => !string.IsNullOrEmpty(s)),
+                StringComparer.OrdinalIgnoreCase);
 
             if (originalStems.Count == 0)
                 return false;
 
-            // Filenames that match the canonical current-version shape — these
-            // must NOT be deleted. Compared by exact filename (case-insensitive)
-            // so a stale uppercase variant on Windows still gets cleaned up.
             var canonicalNames = new HashSet<string>(
                 planned.Select(p => p.FileName),
                 StringComparer.OrdinalIgnoreCase);
 
             var anyRemoved = false;
-            var existingFiles = Directory.GetFiles(installPath, "*.dll", SearchOption.TopDirectoryOnly);
-
-            foreach (var stem in originalStems)
+            foreach (var dllPath in Directory.GetFiles(installPath, "*.dll", SearchOption.TopDirectoryOnly))
             {
-                // {stem}.dll  or  {stem}.<numeric-version>.dll  (1-4 segments,
-                // each segment 1-9 digits — System.Version's ceiling).
-                var pattern = new Regex(
-                    @"^" + Regex.Escape(stem) + @"(\.\d+(?:\.\d+){0,3})?\.dll$",
-                    RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+                var fileName = Path.GetFileName(dllPath);
+                if (canonicalNames.Contains(fileName))
+                    continue;
 
-                foreach (var dllPath in existingFiles)
-                {
-                    var fileName = Path.GetFileName(dllPath);
-                    if (canonicalNames.Contains(fileName))
-                        continue;
-                    if (!pattern.IsMatch(fileName))
-                        continue;
+                // Reuse the manifest's filename parser so the version-tail
+                // grammar stays defined in one place. Unversioned legacy
+                // {stem}.dll files (e.g. McpPlugin.dll dropped in by hand)
+                // fall through to GetFileNameWithoutExtension.
+                var stem = NuGetInstallManifest.TryParseInstalledDllName(fileName, out var parsedStem, out _) && parsedStem != null
+                    ? parsedStem
+                    : Path.GetFileNameWithoutExtension(fileName);
 
-                    Debug.Log($"{Tag} Removing stale '{fileName}' from install path — superseded by {packageId} {keepVersion}.");
-                    TryDeleteFile(dllPath);
-                    TryDeleteFile(dllPath + ".meta");
-                    anyRemoved = true;
-                }
+                if (!originalStems.Contains(stem))
+                    continue;
+
+                Debug.Log($"{Tag} Removing stale '{fileName}' from install path — superseded by {packageId} {keepVersion}.");
+                TryDeleteFile(dllPath);
+                TryDeleteFile(dllPath + ".meta");
+                anyRemoved = true;
             }
 
             return anyRemoved;
