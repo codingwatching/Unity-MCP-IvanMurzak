@@ -23,72 +23,117 @@ namespace com.IvanMurzak.Unity.MCP.Editor.DependencyResolver
     /// Extracts DLLs from .nupkg files (which are zip archives).
     /// Selects the best target framework match and skips irrelevant content.
     /// Also parses the .nuspec for transitive dependency information.
+    ///
+    /// Since #733 the extractor writes DLLs FLAT under the install directory
+    /// using the versioned filename pattern <c>{stem}.{packageVersion}.dll</c>
+    /// (e.g. <c>System.Memory.10.0.3.dll</c>) instead of the previous
+    /// <c>{Id}.{Version}/{Dll}.dll</c> per-package layout. This shortens the
+    /// longest install path enough to keep the resulting DLLs inside
+    /// Windows' legacy <c>MAX_PATH = 260</c> limit on the project layouts
+    /// that previously broke (deep worktree / OneDrive paths). The version
+    /// in the filename also makes the install layout self-describing and
+    /// hardens stale-version detection — even if the manifest is corrupted,
+    /// the on-disk filenames carry the version metadata.
+    ///
+    /// Consuming asmdef <c>precompiledReferences</c> must reference the
+    /// versioned filename (e.g. <c>System.Text.Json.8.0.5.dll</c>); they
+    /// are updated in lockstep with the configured package version.
     /// </summary>
     static class NuGetExtractor
     {
         /// <summary>
-        /// Extracts DLLs from a .nupkg file to the install directory.
-        /// Returns the list of extracted DLL file paths, joined under <paramref name="installDirectory"/>
-        /// (so the result is relative or absolute in the same form as the caller's install directory).
+        /// Plans the flat-layout DLL paths a package would produce without
+        /// extracting anything. Used by the long-path pre-flight to reject an
+        /// install before any disk write happens (see issue #733).
+        ///
+        /// Returns the list of (zip-entry, planned-on-disk-path) pairs. The
+        /// list is empty for development-only dependencies and packages that
+        /// ship no compatible framework folder; both cases are valid no-op
+        /// installs that the caller treats as "nothing to do".
         /// </summary>
-        public static List<string> ExtractDlls(string nupkgPath, string installDirectory)
+        public static List<PlannedDll> PlanDllPaths(string nupkgPath, string installDirectory, string packageVersion)
         {
-            var extractedDlls = new List<string>();
+            var planned = new List<PlannedDll>();
+
+            using var zip = ZipFile.OpenRead(nupkgPath);
+
+            var libEntries = CollectLibEntries(zip);
+            var bestFramework = SelectBestFramework(libEntries.Keys);
+            if (bestFramework == null || !libEntries.TryGetValue(bestFramework, out var frameworkEntries))
+                return planned;
+
+            foreach (var entry in frameworkEntries)
+            {
+                // Snapshot FullName / Name into the PlannedDll BEFORE the zip
+                // disposes — accessing them on the entry after Dispose throws.
+                var versionedName = ToVersionedFileName(entry.Name, packageVersion);
+                var fullName = entry.FullName;
+                var targetPath = Path.Combine(installDirectory, versionedName);
+                planned.Add(new PlannedDll(fullName, versionedName, targetPath));
+            }
+
+            return planned;
+        }
+
+        /// <summary>
+        /// Extracts DLLs from a .nupkg file FLAT under the install directory,
+        /// rewriting each filename to <c>{stem}.{packageVersion}.dll</c>.
+        ///
+        /// Returns the list of extracted (versioned) DLL filenames — relative,
+        /// no directory prefix, sit directly under <paramref name="installDirectory"/>.
+        /// Empty list when the package has no DLLs in any compatible framework folder.
+        /// </summary>
+        public static List<string> ExtractDlls(string nupkgPath, string installDirectory, string packageVersion)
+        {
+            var extracted = new List<string>();
 
             if (!Directory.Exists(installDirectory))
                 Directory.CreateDirectory(installDirectory);
 
-            using (var zip = ZipFile.OpenRead(nupkgPath))
+            var planned = PlanDllPaths(nupkgPath, installDirectory, packageVersion);
+            if (planned.Count == 0)
+                return extracted;
+
+            using var zip = ZipFile.OpenRead(nupkgPath);
+
+            // Re-resolve entries by full name from the freshly opened archive.
+            // Holding ZipArchiveEntry references across two ZipFile.OpenRead
+            // calls is unsafe (the underlying stream is owned by the first
+            // archive's Dispose). PlanDllPaths captured FullName up front; we
+            // just look those names up in this archive.
+            var entriesByName = zip.Entries.ToDictionary(e => e.FullName, StringComparer.OrdinalIgnoreCase);
+            foreach (var p in planned)
             {
-                // Collect lib/ entries grouped by target framework
-                var libEntries = new Dictionary<string, List<ZipArchiveEntry>>(StringComparer.OrdinalIgnoreCase);
+                if (!entriesByName.TryGetValue(p.EntryFullName, out var entry))
+                    continue;
 
-                foreach (var entry in zip.Entries)
-                {
-                    var entryName = entry.FullName.Replace('\\', '/');
-
-                    if (!entryName.StartsWith("lib/", StringComparison.OrdinalIgnoreCase))
-                        continue;
-
-                    // Skip directories, non-DLL files, and files we don't need
-                    if (string.IsNullOrEmpty(entry.Name) || ShouldSkip(entryName))
-                        continue;
-
-                    var parts = entryName.Split('/');
-                    if (parts.Length < 3)
-                        continue;
-
-                    var framework = parts[1];
-                    if (!libEntries.TryGetValue(framework, out var entries))
-                    {
-                        entries = new List<ZipArchiveEntry>();
-                        libEntries[framework] = entries;
-                    }
-                    entries.Add(entry);
-                }
-
-                // Select the best target framework
-                var bestFramework = SelectBestFramework(libEntries.Keys);
-                if (bestFramework == null)
-                {
-                    Debug.LogWarning($"[NuGet] No compatible framework found in {Path.GetFileName(nupkgPath)}. " +
-                                     $"Available: {string.Join(", ", libEntries.Keys)}");
-                    return extractedDlls;
-                }
-
-                // Extract DLLs from the selected framework
-                if (libEntries.TryGetValue(bestFramework, out var frameworkEntries))
-                {
-                    foreach (var entry in frameworkEntries)
-                    {
-                        var targetPath = Path.Combine(installDirectory, entry.Name);
-                        entry.ExtractToFile(targetPath, overwrite: true);
-                        extractedDlls.Add(targetPath);
-                    }
-                }
+                entry.ExtractToFile(p.TargetPath, overwrite: true);
+                extracted.Add(p.FileName);
             }
 
-            return extractedDlls;
+            return extracted;
+        }
+
+        /// <summary>
+        /// Rewrites a DLL filename to the flat-layout pattern
+        /// <c>{stem}.{packageVersion}{extension}</c>. If the input already
+        /// ends in the expected version tail (e.g. a hand-prepared zip), the
+        /// rename is a no-op so the operation is idempotent.
+        /// </summary>
+        internal static string ToVersionedFileName(string originalDllFileName, string packageVersion)
+        {
+            var stem = Path.GetFileNameWithoutExtension(originalDllFileName);
+            var extension = Path.GetExtension(originalDllFileName);
+            if (string.IsNullOrEmpty(extension))
+                extension = ".dll";
+
+            // Defensive: if the stem already ends in ".{packageVersion}", do
+            // not append again. Real .nupkg entries never do, but a re-run
+            // against a hand-tagged zip should be a no-op.
+            if (stem.EndsWith("." + packageVersion, StringComparison.OrdinalIgnoreCase))
+                return stem + extension;
+
+            return $"{stem}.{packageVersion}{extension}";
         }
 
         /// <summary>
@@ -183,6 +228,37 @@ namespace com.IvanMurzak.Unity.MCP.Editor.DependencyResolver
             }
 
             return dependencies;
+        }
+
+        static Dictionary<string, List<ZipArchiveEntry>> CollectLibEntries(ZipArchive zip)
+        {
+            var libEntries = new Dictionary<string, List<ZipArchiveEntry>>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var entry in zip.Entries)
+            {
+                var entryName = entry.FullName.Replace('\\', '/');
+
+                if (!entryName.StartsWith("lib/", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                // Skip directories, non-DLL files, and files we don't need
+                if (string.IsNullOrEmpty(entry.Name) || ShouldSkip(entryName))
+                    continue;
+
+                var parts = entryName.Split('/');
+                if (parts.Length < 3)
+                    continue;
+
+                var framework = parts[1];
+                if (!libEntries.TryGetValue(framework, out var entries))
+                {
+                    entries = new List<ZipArchiveEntry>();
+                    libEntries[framework] = entries;
+                }
+                entries.Add(entry);
+            }
+
+            return libEntries;
         }
 
         /// <summary>
@@ -320,6 +396,42 @@ namespace com.IvanMurzak.Unity.MCP.Editor.DependencyResolver
             }
 
             return false;
+        }
+    }
+
+    /// <summary>
+    /// One DLL the extractor is about to write under the install directory in
+    /// the flat-layout style. Returned by <see cref="NuGetExtractor.PlanDllPaths"/>.
+    ///
+    /// The struct deliberately stores strings rather than the live
+    /// <see cref="ZipArchiveEntry"/> reference: <see cref="NuGetExtractor.PlanDllPaths"/>
+    /// disposes its zip before returning, and accessing entry properties on
+    /// a disposed archive throws.
+    /// </summary>
+    readonly struct PlannedDll
+    {
+        /// <summary>
+        /// Full archive-relative path of the source entry (e.g.
+        /// <c>lib/netstandard2.0/System.Text.Json.dll</c>). Used by
+        /// <see cref="NuGetExtractor.ExtractDlls"/> to re-resolve the entry
+        /// in a freshly opened zip.
+        /// </summary>
+        public string EntryFullName { get; }
+
+        /// <summary>
+        /// The DLL filename relative to the install directory
+        /// (e.g. <c>System.Text.Json.dll</c>).
+        /// </summary>
+        public string FileName { get; }
+
+        /// <summary>The full on-disk path of the planned write.</summary>
+        public string TargetPath { get; }
+
+        public PlannedDll(string entryFullName, string fileName, string targetPath)
+        {
+            EntryFullName = entryFullName;
+            FileName = fileName;
+            TargetPath = targetPath;
         }
     }
 }
